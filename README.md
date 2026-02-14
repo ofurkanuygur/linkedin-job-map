@@ -11,6 +11,10 @@ A Chrome Extension that brings LinkedIn job listings to life on an interactive, 
 [![Manifest V3](https://img.shields.io/badge/Manifest-V3-a855f7?style=for-the-badge&logo=googlechrome&logoColor=white)](https://developer.chrome.com/docs/extensions/mv3/)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Compatible-0a66c2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/jobs/)
 
+<p>
+  <b>English</b> | <a href="README.tr.md">Turkce</a>
+</p>
+
 <br/>
 
 <img src="docs/screenshots/hero.png" alt="LinkedIn Job Map - Hero Screenshot" width="820" />
@@ -176,6 +180,29 @@ LinkedIn Job Map is built with privacy as a core principle:
 
 ---
 
+## Code Quality
+
+This project includes **SonarQube** and **Vitest** for code quality and test coverage.
+
+### Running Tests
+
+```bash
+npm install
+npm test                # Run tests
+npm run test:coverage   # Run with coverage report
+```
+
+### SonarQube Analysis
+
+```bash
+cp .env.example .env    # Edit SONAR_TOKEN value
+npm run sonar:full      # Start SonarQube via Docker + run scan
+```
+
+See the [SonarQube Documentation](https://docs.sonarqube.org/latest/) for detailed setup.
+
+---
+
 ## Contributing
 
 Contributions are welcome! Here's how to get started:
@@ -202,204 +229,7 @@ This project is licensed under the **MIT License** -- see the [LICENSE](LICENSE)
 
 ---
 
----
-
 <div align="center">
-
-## Turkce
-
-### Is aramanizi gercekten *gorun*.
-
-LinkedIn is ilanlarini interaktif, karanlik temali bir harita uzerinde gorunturlestiren bir Chrome Eklentisi -- boylece islerin sadece ne oldugunu degil, *nerede* oldugunu da anlayabilirsiniz.
-
-</div>
-
----
-
-### Ozellikler
-
-- **Interaktif Harita Katmani** -- LinkedIn is sayfanizin icinde dogrudan gorunen, karanlik Mapbox karolari ile tam Leaflet.js haritasi
-- **Isaretci Kumeleme** -- Yuzlerce is akilli bir sekilde gruplanir; yakinlastirarak tek tek pinleri gorun
-- **Calisma Yeri Turu Filtreleme** -- Yerinde (mavi), Hibrit (yesil) ve Uzaktan (mor) seceneklerini canli sayaclarla acip kapatin
-- **Metin Arama** -- Is basliklari, sirketler ve konumlar uzerinde gercek zamanli arama
-- **Akilli Siralama** -- Konumunuza gore mesafe, sirket adi, calisma turu veya ilan tarihi ile siralama
-- **Sirket Logolari** -- LinkedIn API'sinden dogrudan cekilir, hata durumunda bas harf yedegi
-- **Is Ilan Tarihleri** -- Kartlarda ve harita acilir pencerelerinde goreceli zaman damgalari ("2g once", "1h once")
-- **CSV Disa Aktarimi** -- Haritalanmis tum isleri tek tikla UTF-8 CSV dosyasi olarak indirin
-- **Klavye Kisayollari** -- Fareye dokunmadan is listesinde gezinin
-- **Yolculuk Suresi Tahmini** -- Gercekci tahminler icin mesafeye dayali seyahat suresi bolgelerini kullanir (sehir ici, banliyö, otoban)
-- **Cift Yonlu Senkronizasyon** -- Bir is kartina tiklayin, harita oraya ucusun; bir harita pinini tiklayin, kart vurgulansin
-- **Tam Ekran Modu** -- Haritayi tum gorunume genisletin, yandan kayar is paneli ile
-- **GPS ve Tikla Konum** -- GPS butonu ile veya haritada herhangi bir yere tiklayarak konumunuzu belirleyin
-- **OSRM Rotalama** -- Konumunuz ile herhangi bir is arasinda gercek suruculuk/bisiklet rotasi
-- **Iki Dilli Arayuz** -- Tam Ingilizce ve Turkce arayuz, tarayici dilinden otomatik algilanir
-- **Karanlik Glassmorphism Temasi** -- LinkedIn'in karanlik moduna uyumlu, modern ve cilali tasarim
-- **Onbellek Yonetimi** -- Geocoding sonuclari yerel olarak onbellege alinir; basliktan tum onbellegi temizleyin
-- **Ozel Mapbox Anahtari** -- Yerlesik anahtari kullanin veya daha yuksek hiz limitleri icin kendinizinkini yapilandirin
-
----
-
-### Ekran Goruntuleri
-
-<div align="center">
-<table>
-<tr>
-<td align="center" width="50%">
-<img src="docs/screenshots/map-overview.png" alt="Harita Genel Gorunumu" width="400" /><br/>
-<strong>Harita Genel Gorunumu</strong><br/>
-<sub>Isaretci kumeleme ile tum isler</sub>
-</td>
-<td align="center" width="50%">
-<img src="docs/screenshots/fullscreen-panel.png" alt="Tam Ekran ve Is Paneli" width="400" /><br/>
-<strong>Tam Ekran Modu</strong><br/>
-<sub>Filtre cubugu ile kart tabanli is paneli</sub>
-</td>
-</tr>
-<tr>
-<td align="center">
-<img src="docs/screenshots/filtering.png" alt="Calisma Turu Filtreleme" width="400" /><br/>
-<strong>Filtreleme ve Arama</strong><br/>
-<sub>Sayacli renk kodlu calisma turu cipleri</sub>
-</td>
-<td align="center">
-<img src="docs/screenshots/route.png" alt="Rota ve Yolculuk" width="400" /><br/>
-<strong>Rota ve Yolculuk</strong><br/>
-<sub>Tahmini seyahat suresi ile OSRM rotalama</sub>
-</td>
-</tr>
-</table>
-</div>
-
-> **Not:** Yukaridaki yer tutucu resim yollarini gercek ekran goruntuleri ile degistirin. Onerilen boyut: 1280x800 veya benzer 16:10 orani.
-
----
-
-### Kurulum
-
-#### Chrome Web Magaza'dan (Onerilen)
-
-1. Chrome Web Magaza'da [LinkedIn Job Map](https://chrome.google.com/webstore/detail/placeholder) sayfasini ziyaret edin
-2. **Chrome'a Ekle** butonuna tiklayin
-3. Herhangi bir [LinkedIn Is Arama sayfasina](https://www.linkedin.com/jobs/) gidin ve gorunen **Haritayi Ac** butonuna tiklayin
-
-#### Manuel Kurulum (Gelistirici Modu)
-
-1. **Indirin**:
-   ```bash
-   git clone https://github.com/ofurkanuygur/linkedin-job-map.git
-   ```
-2. Chrome'da `chrome://extensions` adresine gidin
-3. Sag ust kosedeki **Gelistirici modu** toggla'ini aktif edin
-4. **Paketlenmemis oge yukle** butonuna tiklayin ve klonlanan `linkedin-job-map` klasorunu secin
-5. Herhangi bir [LinkedIn Is Arama sayfasina](https://www.linkedin.com/jobs/) gidin -- eklenti otomatik olarak etkinlesir
-
----
-
-### Kullanim
-
-1. LinkedIn'de normalde yaptiginiz gibi **is arayin** (`linkedin.com/jobs/...`)
-2. Sayfanin alt kisminda gorunen **"Haritayi Ac"** butonuna tiklayin
-3. Harita paneli acilir -- isler otomatik olarak alinir, geocode edilir ve haritaya yerlestirilir
-4. GPS butonu ile veya haritaya tiklayarak **konumunuzu belirleyin**
-5. Renkli ciplerle (Yerinde / Hibrit / Uzaktan) calisma turunne gore **filtreleyin**
-6. Baslik, sirket veya konuma gore filtrelemek icin arama cuubuguna **yazin**
-7. Acilir menuyu kullanarak **siralin** (Mesafe, Sirket, Tur, Tarih)
-8. Haritada konumuna ucmak icin bir **is kartina tiklayin** veya karti vurgulamak icin bir **harita isaretcisine tiklayin**
-9. **Ilana Git** tam LinkedIn ilanini acar; **Haritalar** konumu Google Haritalar'da acar
-10. Dikkat dagitici olmayan, tam ekran harita deneyimi icin **tam ekran** butonuna basin
-11. Harici analiz icin sonuclarinizi **CSV olarak disa aktarin**
-
----
-
-### Yapilandirma
-
-#### Mapbox Erisim Anahtari
-
-Eklenti, kutudan cikar cikkmaz calisan varsayilan bir Mapbox anahtari ile gelir. Yogun kullanim veya daha yuksek hiz limitleri icin kendinizinkini saglayabilirsiniz:
-
-1. [mapbox.com](https://www.mapbox.com/) adresinde ucretsiz bir hesap olusturun
-2. [Anahtarlar sayfasindan](https://account.mapbox.com/access-tokens/) **varsayilan genel anahtarinizi** kopyalayin
-3. Chrome'da LinkedIn Job Map eklenti simgesine sag tiklayin ve **Secenekler**'i secin
-4. Anahtarinizi yapistirin ve **Kaydet**'e tiklayin
-5. Calistigini dogrulamak icin **Anahtari Test Et** butonunu kullanin
-6. Yeni anahtari uygulamak icin LinkedIn sekmenizi yeniden yukleyin
-
-> Ucretsiz Mapbox katmani ayda 100.000 geocoding istegi icerir; bu tipik is aramalari icin fazlasiyla yeterlidir.
-
----
-
-### Teknoloji Yigini
-
-| Bilesen | Teknoloji |
-|---|---|
-| Eklenti Platformu | Chrome Extension Manifest V3 |
-| Harita Motoru | [Leaflet.js](https://leafletjs.com/) |
-| Isaretci Kumeleme | [Leaflet.markercluster](https://github.com/Leaflet/Leaflet.markercluster) |
-| Harita Karolari | [Mapbox](https://www.mapbox.com/) (Karanlik tema) |
-| Geocoding | [Mapbox Geocoding API](https://docs.mapbox.com/api/search/geocoding/) |
-| Rotalama | [OSRM](https://project-osrm.org/) (Acik Kaynakli Rotalama Motoru) |
-| Is Verileri | LinkedIn Voyager API (dahili, content script araciligiyla) |
-| Arayuz Tasarimi | Glassmorphism efektli ozel CSS |
-| Uluslararasilastirma | Sablon ikameli ozel `t()` yardimcisi |
-
----
-
-### Klavye Kisayollari
-
-| Tus | Islem |
-|---|---|
-| `Esc` | Harita panelini kapat veya tam ekrandan cik |
-| `Yukari Ok` | Onceki is kartina git |
-| `Asagi Ok` | Sonraki is kartina git |
-| `Enter` | Secili isin LinkedIn ilanini ac |
-
-> Klavye kisayollari, bir metin girisi alani odakli oldugunda otomatik olarak devre disi birakilir.
-
----
-
-### Gizlilik
-
-LinkedIn Job Map, temel ilke olarak gizlilik ile tasarlanmistir:
-
-- **Veri toplama yok** -- Hicbir analitik, telemetri veya herhangi bir izleme yapilmaz
-- **Harici sunucu yok** -- Tum islemler tarayicinizda yerel olarak gerceklesir
-- **Hesap gerektirmez** -- Eklenti kurulumdan hemen sonra calisir
-- **Yalnizca yerel onbellekleme** -- Geocoding sonuclari tarayicinizin `localStorage`'inda saklanir ve asla iletilmez
-- **Minimum izinler** -- Yalnizca `activeTab` ve `storage` ister; ag erisimi Mapbox (geocoding/karolar) ve OSRM (rotalama) ile sinirlidir
-
----
-
-### Katki
-
-Katkilarinizi bekliyoruz! Baslamak icin:
-
-1. Bu depoyu **fork**'layin
-2. Bir **ozellik dali** olusturun (`git checkout -b feature/harika-ozellik`)
-3. Degisikliklerinizi yapin ve bir LinkedIn Is sayfasinda **test edin**
-4. Degisikliklerinizi **commit**'leyin (`git commit -m 'Harika ozellik ekle'`)
-5. Daliniza **push** yapin (`git push origin feature/harika-ozellik`)
-6. Ne degistirdiginizi ve nedenini acikca belirten bir **Pull Request** acin
-
-#### Gelistirme Notlari
-
-- Tum content script, global kapsam kirliligini onlemek icin bir IIFE icine sarilmistir
-- `content.js` (~1.800 satir) tum harita, arayuz ve API mantigi icerir
-- `styles.css` (~1.000 satir) karanlik glassmorphism temasiyla ilgilenir
-- Degisiklikleri `chrome://extensions` adresinde eklentiyi yeniden yukleyerek ve bir LinkedIn Is sayfasini yenileyerek test edin
-
----
-
-### Lisans
-
-Bu proje **MIT Lisansi** ile lisanslanmistir -- ayrintilar icin [LICENSE](LICENSE) dosyasina bakin.
-
----
-
-<div align="center">
-
-<br/>
-
-**LinkedIn Job Map** ile yapilmistir -- Is aramanizi harita uzerinde gorunturlestirin.
 
 <br/>
 

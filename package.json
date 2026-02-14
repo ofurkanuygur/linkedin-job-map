@@ -1,0 +1,26 @@
+{
+  "name": "linkedin-job-map",
+  "version": "3.1.0",
+  "description": "Chrome Extension – Visualize LinkedIn job listings on an interactive map",
+  "private": true,
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "sonar:up": "docker compose up -d sonarqube",
+    "sonar:scan": "docker compose run --rm sonar-scanner",
+    "sonar:down": "docker compose down",
+    "sonar:full": "npm run test:coverage && npm run sonar:scan",
+    "lint": "eslint content.js options.js",
+    "quality": "npm run test:coverage && npm run lint && npm run sonar:scan"
+  },
+  "devDependencies": {
+    "vitest": "^3.0.0",
+    "@vitest/coverage-v8": "^3.0.0",
+    "eslint": "^9.0.0",
+    "jsdom": "^25.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

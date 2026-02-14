@@ -1831,5 +1831,23 @@
     reattachJobListObserver();
   }
 
-  init();
+  // ── Test exports (only in test environment) ──
+  if (typeof module !== "undefined" && module.exports) {
+    module.exports = {
+      escapeHtml: escapeHtml,
+      timeAgo: timeAgo,
+      debounce: debounce,
+      haversineKm: haversineKm,
+      formatDistance: formatDistance,
+      estimateCommuteMin: estimateCommuteMin,
+      getWorkplaceType: getWorkplaceType,
+      getWorkplaceLabel: getWorkplaceLabel,
+      buildAddressString: buildAddressString,
+      extractGeoLocation: extractGeoLocation,
+      t: t,
+      translations: translations
+    };
+  } else {
+    init();
+  }
 })();

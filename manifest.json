@@ -1,10 +1,11 @@
 {
   "manifest_version": 3,
   "name": "LinkedIn Job Map",
-  "version": "3.0.0",
-  "description": "Visualize LinkedIn job listings on an interactive map with routing & distance",
+  "version": "3.1.0",
+  "description": "Visualize LinkedIn job listings on an interactive map with routing, commute estimation & workplace filtering",
   "permissions": ["activeTab", "storage"],
   "host_permissions": [
+    "https://www.linkedin.com/voyager/api/*",
     "https://router.project-osrm.org/*",
     "https://api.mapbox.com/*"
   ],
@@ -21,9 +22,15 @@
     "open_in_tab": true
   },
   "action": {
-    "default_title": "LinkedIn Job Map"
+    "default_title": "LinkedIn Job Map",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
   },
   "icons": {
+    "16": "icons/icon16.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   }

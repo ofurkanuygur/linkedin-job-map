@@ -81,7 +81,6 @@ A Chrome Extension that brings LinkedIn job listings to life on an interactive, 
 </table>
 </div>
 
-> **Note:** Replace the placeholder image paths above with actual screenshots. Recommended size: 1280x800 or similar 16:10 ratio.
 
 ---
 

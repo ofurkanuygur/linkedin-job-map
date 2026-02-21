@@ -1290,6 +1290,7 @@
       return;
     }
 
+    var fragment = document.createDocumentFragment();
     jobs.forEach(function (job, idx) {
       var card = document.createElement("div");
       card.className = "ljm-job-card" + (idx === 0 ? " ljm-card-active" : "");
@@ -1390,8 +1391,9 @@
         setTimeout(function () { isSyncing = false; }, 1000);
       });
 
-      cardsListEl.appendChild(card);
+      fragment.appendChild(card);
     });
+    cardsListEl.appendChild(fragment);
   }
 
   // ── UI ──
@@ -1845,7 +1847,41 @@
       buildAddressString: buildAddressString,
       extractGeoLocation: extractGeoLocation,
       t: t,
-      translations: translations
+      translations: translations,
+      detectLocale: detectLocale,
+      getWtClass: getWtClass,
+      getTagClass: getTagClass,
+      getCsrfToken: getCsrfToken,
+      findBestAddress: findBestAddress,
+      processInParallel: processInParallel,
+      getProximityHint: getProximityHint,
+      geocodeLocation: geocodeLocation,
+      fetchRoute: fetchRoute,
+      fetchJobWithCompany: fetchJobWithCompany,
+      fetchCompanyLocations: fetchCompanyLocations,
+      geocodeJobs: geocodeJobs,
+      enrichWithCompanyAddress: enrichWithCompanyAddress,
+      loadSession: loadSession,
+      saveSession: saveSession,
+      getGeocodeCache: getGeocodeCache,
+      setGeocodeCache: setGeocodeCache,
+      getCommuteDisplay: getCommuteDisplay,
+      getFilteredJobs: getFilteredJobs,
+      getAllJobs: getAllJobs,
+      extractJobIds: extractJobIds,
+      apiHeaders: apiHeaders,
+      buildPopup: buildPopup,
+      _setMyLocation: function (loc) { myLocation = loc; },
+      _setAllJobsById: function (jobs) { allJobsById = jobs; },
+      _setFilterState: function (state) { filterState = state; },
+      _setSortState: function (state) { sortState = state; },
+      _setSearchQuery: function (q) { searchQuery = q; },
+      _setCompanyNames: function (names) { companyNames = names; },
+      _setCompanyCache: function (cache) { companyCache = cache; },
+      _setCurrentLocale: function (locale) { currentLocale = locale; },
+      _getMyLocation: function () { return myLocation; },
+      _getAllJobsById: function () { return allJobsById; },
+      _getCompanyCache: function () { return companyCache; }
     };
   } else {
     init();

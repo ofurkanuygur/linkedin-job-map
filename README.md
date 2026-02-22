@@ -8,6 +8,8 @@ A Chrome Extension that brings LinkedIn job listings to life on an interactive, 
 
 [![Chrome Web Store Version](https://img.shields.io/chrome-web-store/v/placeholder?style=for-the-badge&logo=googlechrome&logoColor=white&label=Chrome%20Web%20Store&color=0a66c2)](https://chrome.google.com/webstore/detail/placeholder)
 [![License: MIT](https://img.shields.io/badge/License-MIT-10b981?style=for-the-badge)](LICENSE)
+[![Tests](https://img.shields.io/badge/Tests-48%20passed-10b981?style=for-the-badge&logo=vitest&logoColor=white)](tests/)
+[![Coverage](https://img.shields.io/badge/Branch%20Coverage-90%25-10b981?style=for-the-badge&logo=vitest&logoColor=white)](coverage/)
 [![Manifest V3](https://img.shields.io/badge/Manifest-V3-a855f7?style=for-the-badge&logo=googlechrome&logoColor=white)](https://developer.chrome.com/docs/extensions/mv3/)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Compatible-0a66c2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/jobs/)
 
@@ -181,7 +183,19 @@ LinkedIn Job Map is built with privacy as a core principle:
 
 ## Code Quality
 
-This project includes **SonarQube** and **Vitest** for code quality and test coverage.
+This project uses **Vitest** for testing and **SonarQube** for static analysis.
+
+### Test Coverage
+
+| Metric | Coverage |
+|---|---|
+| **Statements** | 26.23% |
+| **Branches** | 90.14% |
+| **Functions** | 15.78% |
+| **Lines** | 27.4% |
+| **Tests** | 48 passed, 0 failed |
+
+> Branch coverage is prioritized at **90%+** to ensure all conditional logic paths are thoroughly tested.
 
 ### Running Tests
 

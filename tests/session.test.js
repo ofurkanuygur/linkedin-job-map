@@ -1,5 +1,17 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
+// Mock localStorage before loading content.js
+const localStore = {};
+Object.defineProperty(globalThis, "localStorage", {
+  value: {
+    getItem: (key) => localStore[key] ?? null,
+    setItem: (key, val) => { localStore[key] = String(val); },
+    removeItem: (key) => { delete localStore[key]; },
+    clear: () => { Object.keys(localStore).forEach((k) => delete localStore[k]); },
+  },
+  writable: true,
+});
+
 const ljm = require("../content.js");
 
 describe("loadSession / saveSession", () => {
@@ -35,7 +47,7 @@ describe("loadSession / saveSession", () => {
 
 describe("getGeocodeCache / setGeocodeCache", () => {
   beforeEach(() => {
-    localStorage.removeItem("ljm_geocode_cache_v3");
+    localStorage.clear();
   });
 
   it("returns empty object when no cache exists", () => {

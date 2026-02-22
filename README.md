@@ -8,8 +8,8 @@ A Chrome Extension that brings LinkedIn job listings to life on an interactive, 
 
 [![Chrome Web Store Version](https://img.shields.io/chrome-web-store/v/placeholder?style=for-the-badge&logo=googlechrome&logoColor=white&label=Chrome%20Web%20Store&color=0a66c2)](https://chrome.google.com/webstore/detail/placeholder)
 [![License: MIT](https://img.shields.io/badge/License-MIT-10b981?style=for-the-badge)](LICENSE)
-[![Tests](https://img.shields.io/badge/Tests-48%20passed-10b981?style=for-the-badge&logo=vitest&logoColor=white)](tests/)
-[![Coverage](https://img.shields.io/badge/Branch%20Coverage-90%25-10b981?style=for-the-badge&logo=vitest&logoColor=white)](coverage/)
+[![Tests](https://img.shields.io/badge/Tests-414%20passed-10b981?style=for-the-badge&logo=vitest&logoColor=white)](tests/)
+[![Coverage](https://img.shields.io/badge/Coverage-79%25-10b981?style=for-the-badge&logo=vitest&logoColor=white)](coverage/)
 [![Manifest V3](https://img.shields.io/badge/Manifest-V3-a855f7?style=for-the-badge&logo=googlechrome&logoColor=white)](https://developer.chrome.com/docs/extensions/mv3/)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Compatible-0a66c2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/jobs/)
 
@@ -183,19 +183,21 @@ LinkedIn Job Map is built with privacy as a core principle:
 
 ## Code Quality
 
-This project uses **Vitest** for testing and **SonarQube** for static analysis.
+This project uses **Vitest** for testing and **ESLint** for static analysis.
 
 ### Test Coverage
 
 | Metric | Coverage |
 |---|---|
-| **Statements** | 26.23% |
-| **Branches** | 90.14% |
-| **Functions** | 15.78% |
-| **Lines** | 27.4% |
-| **Tests** | 48 passed, 0 failed |
+| **Statements** | 78.62% |
+| **Branches** | 92.06% |
+| **Functions** | 92.00% |
+| **Lines** | 78.62% |
+| **Tests** | 414 passed, 0 failed |
 
-> Branch coverage is prioritized at **90%+** to ensure all conditional logic paths are thoroughly tested.
+Test suites cover helpers, session management, logic/filtering, API/async operations, UI rendering, map interactions, and integration scenarios.
+
+> Branch coverage is at **92%+** and function coverage at **92%** to ensure all critical logic paths are thoroughly tested.
 
 ### Running Tests
 
@@ -230,8 +232,9 @@ Contributions are welcome! Here's how to get started:
 ### Development Notes
 
 - The entire content script is wrapped in an IIFE to avoid global scope pollution
-- `content.js` (~1,800 lines) contains all map, UI, and API logic
+- `content.js` (~2,000 lines) contains all map, UI, and API logic
 - `styles.css` (~1,000 lines) handles the dark glassmorphism theme
+- `tests/` contains 7 test files with 414 tests covering logic, API, UI, map, and integration
 - Test changes by reloading the extension at `chrome://extensions` and refreshing a LinkedIn Jobs page
 
 ---

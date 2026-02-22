@@ -25,7 +25,7 @@
   saveBtn.addEventListener("click", function () {
     var token = tokenInput.value.trim();
     if (!token) {
-      showMsg("Token is empty. Use 'Reset to Default' to clear custom token.", "error");
+      showMsg("Token is required. Get one from mapbox.com.", "error");
       return;
     }
     chrome.storage.sync.set({ mapboxToken: token }, function () {
@@ -58,11 +58,11 @@
       });
   });
 
-  // Reset
+  // Clear
   resetBtn.addEventListener("click", function () {
     chrome.storage.sync.remove("mapboxToken", function () {
       tokenInput.value = "";
-      showMsg("Custom token removed. Default token will be used.", "success");
+      showMsg("Token cleared. Extension requires a token to work.", "success");
     });
   });
 

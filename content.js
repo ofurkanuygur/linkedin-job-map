@@ -5,12 +5,11 @@
 
   // ── Constants ──
 
-  var DEFAULT_TOKEN = "pk.eyJ1IjoidXlndW5mbHkiLCJhIjoiY21qbTVrd2lkMGpybDNkc2VnbXNoOWYyOSJ9.nGp8dJddewwJPS9FyXbByg";
   var GEOCODE_CACHE_KEY = "ljm_geocode_cache_v3";
   var MY_LOC_KEY = "ljm_my_location";
   var ALL_JOBS_KEY = "ljm_all_jobs";
   var COMPANY_NAMES_KEY = "ljm_company_names";
-  var MAPBOX_TOKEN = DEFAULT_TOKEN;
+  var MAPBOX_TOKEN = "";
 
   var WORKPLACE_ONSITE = 1;
   var WORKPLACE_REMOTE = 2;
@@ -81,7 +80,7 @@
       geoNotSupported: "Geolocation not supported by this browser.",
       gettingGPS: "Getting GPS location...",
       gpsSet: "GPS location set.",
-      gpsFailed: "Could not get GPS location. Click the map instead.",
+      gpsFailed: "Could not get GPS location. Set location in extension settings.",
       sortBy: "Sort",
       sortDistance: "Distance",
       sortCompany: "Company",
@@ -97,7 +96,9 @@
       daysAgo: "{n}d ago",
       weeksAgo: "{n}w ago",
       posted: "Posted",
-      sortDate: "Date"
+      sortDate: "Date",
+      tokenRequired: "Mapbox token required. Please set your token in extension settings.",
+      openSettings: "Open Settings"
     },
     tr: {
       openJobMap: "Haritayi Ac",
@@ -151,7 +152,7 @@
       geoNotSupported: "Bu tarayici konum desteklemiyor.",
       gettingGPS: "GPS konumu aliniyor...",
       gpsSet: "GPS konumu ayarlandi.",
-      gpsFailed: "GPS alinamadi. Haritaya tiklayin.",
+      gpsFailed: "GPS alinamadi. Konumu eklenti ayarlarindan belirleyin.",
       sortBy: "Sirala",
       sortDistance: "Mesafe",
       sortCompany: "Sirket",
@@ -167,7 +168,9 @@
       daysAgo: "{n}g once",
       weeksAgo: "{n}hf once",
       posted: "Yayinlandi",
-      sortDate: "Tarih"
+      sortDate: "Tarih",
+      tokenRequired: "Mapbox token gerekli. Lutfen eklenti ayarlarindan token'inizi ayarlayin.",
+      openSettings: "Ayarlari Ac"
     }
   };
 
@@ -219,6 +222,11 @@
   var jobListObserver = null;
   var isLoading = false;
   var shouldFitBoundsNext = true;
+  var scanAbortController = null;
+  var pendingScanAfterLoad = false;
+  var urlWatcherInterval = null;
+  var highlightTimer = null;
+  var debouncedObserverFn = null;
 
   // Filter & Sort state
   var filterState = { onSite: true, hybrid: true, remote: true };
@@ -272,7 +280,7 @@
     var cookies = document.cookie.split(";");
     for (var i = 0; i < cookies.length; i++) {
       var c = cookies[i].trim();
-      if (c.indexOf("JSESSIONID=") === 0) return c.split("=")[1].replace(/"/g, "");
+      if (c.indexOf("JSESSIONID=") === 0) return c.split("=").slice(1).join("=").replace(/"/g, "");
     }
     return "";
   }
@@ -308,7 +316,9 @@
 
   function debounce(fn, ms) {
     var timer;
-    return function () { clearTimeout(timer); timer = setTimeout(fn, ms); };
+    var wrapped = function () { clearTimeout(timer); timer = setTimeout(fn, ms); };
+    wrapped.cancel = function () { clearTimeout(timer); };
+    return wrapped;
   }
 
   // ── Parallel processing (worker pool) ──
@@ -431,7 +441,8 @@
   function fetchCompanyLocations(companyId, csrf) {
     if (companyCache[companyId]) return Promise.resolve(companyCache[companyId]);
     return fetch("https://www.linkedin.com/voyager/api/organization/dash/companies/" + companyId, {
-      headers: apiHeaders(csrf)
+      headers: apiHeaders(csrf),
+      signal: scanAbortController ? scanAbortController.signal : undefined
     })
     .then(function (res) { return res.ok ? res.json() : null; })
     .then(function (json) {
@@ -470,7 +481,7 @@
   function extractGeoLocation(loc) {
     if (!loc) return null;
     var geo = loc.geoLocation || loc.geographicLocation || null;
-    if (geo && geo.latitude && geo.longitude) {
+    if (geo && geo.latitude != null && geo.longitude != null) {
       return { lat: geo.latitude, lng: geo.longitude };
     }
     return null;
@@ -509,7 +520,8 @@
 
   function fetchJobWithCompany(jobId, csrf) {
     return fetch("https://www.linkedin.com/voyager/api/jobs/jobPostings/" + jobId, {
-      headers: apiHeaders(csrf)
+      headers: apiHeaders(csrf),
+      signal: scanAbortController ? scanAbortController.signal : undefined
     })
     .then(function (res) { return res.ok ? res.json() : null; })
     .then(function (json) {
@@ -578,19 +590,25 @@
     if (country) {
       url += "&country=" + country.toLowerCase();
     }
-    return fetch(url)
+    return fetch(url, {
+      signal: scanAbortController ? scanAbortController.signal : undefined
+    })
       .then(function (res) { return res.ok ? res.json() : null; })
       .then(function (data) {
         if (data && data.features && data.features.length > 0) {
           var c = data.features[0].center;
           var result = { lng: c[0], lat: c[1] };
-          cache[location] = result;
-          setGeocodeCache(cache);
+          var freshCache = getGeocodeCache();
+          freshCache[location] = result;
+          setGeocodeCache(freshCache);
           return result;
         }
         return null;
       })
-      .catch(function () { return null; });
+      .catch(function (err) {
+        if (err && err.name === "AbortError") return null;
+        return null;
+      });
   }
 
   function getProximityHint() {
@@ -599,7 +617,7 @@
     if (existing.length === 0) return null;
     var sumLat = 0, sumLng = 0, count = 0;
     existing.forEach(function (j) {
-      if (j.lat && j.lng) { sumLat += j.lat; sumLng += j.lng; count++; }
+      if (j.lat != null && j.lng != null) { sumLat += j.lat; sumLng += j.lng; count++; }
     });
     if (count === 0) return null;
     return { lat: sumLat / count, lng: sumLng / count };
@@ -610,7 +628,7 @@
     var needGeocode = [];
     var addrs = [], addrSet = {};
     jobs.forEach(function (j) {
-      if (j.directLat && j.directLng) return; // has LinkedIn coordinates
+      if (j.directLat != null && j.directLng != null) return; // has LinkedIn coordinates
       if (j.geocodeAddress && !addrSet[j.geocodeAddress]) {
         addrSet[j.geocodeAddress] = true;
         addrs.push({ address: j.geocodeAddress, country: j.countryCode || null });
@@ -627,7 +645,7 @@
     }, CONCURRENCY_GEO, onProgress).then(function () {
       return jobs.map(function (job) {
         var lat, lng;
-        if (job.directLat && job.directLng) {
+        if (job.directLat != null && job.directLng != null) {
           lat = job.directLat;
           lng = job.directLng;
         } else {
@@ -655,7 +673,9 @@
     var url = "https://router.project-osrm.org/route/v1/driving/" +
       fromLng + "," + fromLat + ";" + toLng + "," + toLat +
       "?overview=full&geometries=geojson";
-    return fetch(url)
+    return fetch(url, {
+      signal: scanAbortController ? scanAbortController.signal : undefined
+    })
       .then(function (res) { return res.ok ? res.json() : null; })
       .then(function (data) {
         if (data && data.routes && data.routes.length > 0) {
@@ -668,7 +688,10 @@
         }
         return null;
       })
-      .catch(function () { return null; });
+      .catch(function (err) {
+        if (err && err.name === "AbortError") return null;
+        return null;
+      });
   }
 
   function showRoute(toLat, toLng) {
@@ -682,7 +705,7 @@
       }).addTo(map);
       map.fitBounds(routeLayer.getBounds(), { padding: [50, 50] });
       setStatus(t("routeInfo", { distance: route.distanceKm, duration: route.durationMin }));
-    });
+    }).catch(function () { setStatus(t("routeNotAvailable")); });
   }
 
   function clearRoute() {
@@ -704,7 +727,8 @@
   }
 
   function buildPopup(job) {
-    var linkUrl = "https://www.linkedin.com/jobs/view/" + job.jobId;
+    var safeJobId = String(job.jobId).replace(/[^a-zA-Z0-9]/g, '');
+    var linkUrl = "https://www.linkedin.com/jobs/view/" + safeJobId;
     var wtClass = getWtClass(job.workplaceType);
     var addrText = job.hasPreciseAddress ? job.address : job.location;
 
@@ -717,12 +741,25 @@
         '</div>';
     }
 
-    var mapsUrl = myLocation
-      ? "https://www.google.com/maps/dir/?api=1&origin=" + myLocation.lat + "," + myLocation.lng + "&destination=" + job.lat + "," + job.lng
-      : "https://www.google.com/maps/dir/?api=1&destination=" + job.lat + "," + job.lng;
+    var mapsUrl = "";
+    var safeLat = Number(job.lat);
+    var safeLng = Number(job.lng);
+    if (isFinite(safeLat) && isFinite(safeLng)) {
+      if (myLocation) {
+        var safeMyLat = Number(myLocation.lat);
+        var safeMyLng = Number(myLocation.lng);
+        if (isFinite(safeMyLat) && isFinite(safeMyLng)) {
+          mapsUrl = "https://www.google.com/maps/dir/?api=1&origin=" + safeMyLat + "," + safeMyLng + "&destination=" + safeLat + "," + safeLng;
+        } else {
+          mapsUrl = "https://www.google.com/maps/dir/?api=1&destination=" + safeLat + "," + safeLng;
+        }
+      } else {
+        mapsUrl = "https://www.google.com/maps/dir/?api=1&destination=" + safeLat + "," + safeLng;
+      }
+    }
 
     var logoHtml = job.logoUrl
-      ? '<img class="ljm-popup-logo" src="' + escapeHtml(job.logoUrl) + '" alt="" onerror="this.style.display=\'none\'">'
+      ? '<img class="ljm-popup-logo" src="' + escapeHtml(job.logoUrl) + '" alt="">'
       : '';
 
     return '<div class="ljm-popup">' +
@@ -742,7 +779,7 @@
       distHtml +
       '<div class="ljm-popup-actions">' +
         '<a href="' + linkUrl + '" target="_blank" class="ljm-popup-btn ljm-popup-btn-primary">' + t("linkedInBtn") + '</a>' +
-        '<a href="' + mapsUrl + '" target="_blank" class="ljm-popup-btn ljm-popup-btn-secondary">' + t("mapsBtn") + ' \u2197</a>' +
+        (mapsUrl ? '<a href="' + mapsUrl + '" target="_blank" class="ljm-popup-btn ljm-popup-btn-secondary">' + t("mapsBtn") + ' \u2197</a>' : '') +
       '</div>' +
     '</div>';
   }
@@ -834,12 +871,13 @@
       }
     });
 
-    var saved = localStorage.getItem(MY_LOC_KEY);
-    if (saved) {
-      try {
-        var loc = JSON.parse(saved);
-        if (loc.lat && loc.lng) setMyLocation(loc.lat, loc.lng, true);
-      } catch (e) {}
+    if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+      chrome.storage.local.get(MY_LOC_KEY, function (result) {
+        if (result && result[MY_LOC_KEY]) {
+          var loc = result[MY_LOC_KEY];
+          if (loc.lat != null && loc.lng != null) setMyLocation(loc.lat, loc.lng, true);
+        }
+      });
     }
   }
 
@@ -864,11 +902,17 @@
     myLocationMarker.on("dragend", function () {
       var pos = myLocationMarker.getLatLng();
       myLocation = { lat: pos.lat, lng: pos.lng };
-      localStorage.setItem(MY_LOC_KEY, JSON.stringify(myLocation));
+      if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+        var obj = {}; obj[MY_LOC_KEY] = myLocation;
+        chrome.storage.local.set(obj);
+      }
       refreshPopups();
     });
 
-    if (!skipSave) localStorage.setItem(MY_LOC_KEY, JSON.stringify(myLocation));
+    if (!skipSave && typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+      var obj = {}; obj[MY_LOC_KEY] = myLocation;
+      chrome.storage.local.set(obj);
+    }
     refreshPopups();
   }
 
@@ -876,7 +920,9 @@
     myLocation = null;
     myLocationMarker = null;
     myLocationLayer.clearLayers();
-    localStorage.removeItem(MY_LOC_KEY);
+    if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+      chrome.storage.local.remove(MY_LOC_KEY);
+    }
     clearRoute();
     refreshPopups();
   }
@@ -930,13 +976,15 @@
   }
 
   function highlightMarkerRing(latlng) {
+    if (highlightTimer) clearTimeout(highlightTimer);
     if (highlightLayer) { map.removeLayer(highlightLayer); }
     highlightLayer = L.circleMarker(latlng, {
       radius: 22, fillColor: "transparent", color: "#f59e0b",
       weight: 3, opacity: 0.9, fillOpacity: 0
     }).addTo(map);
-    setTimeout(function () {
+    highlightTimer = setTimeout(function () {
       if (highlightLayer) { map.removeLayer(highlightLayer); highlightLayer = null; }
+      highlightTimer = null;
     }, 2500);
   }
 
@@ -1012,6 +1060,10 @@
         radius: 7, fillColor: color, color: "#fff", weight: 2, opacity: 1, fillOpacity: 0.9
       });
       marker.bindPopup(buildPopup(job));
+      marker.on('popupopen', function () {
+        var img = marker.getPopup().getElement().querySelector('.ljm-popup-logo');
+        if (img) { img.addEventListener('error', function () { this.style.display = 'none'; }); }
+      });
       marker._ljmJobId = job.jobId;
       markersLayer.addLayer(marker);
       markerRefs[job.jobId] = marker;
@@ -1078,17 +1130,17 @@
 
   // ── CSV Export ──
 
+  function csvEscape(val) {
+    var s = String(val || "");
+    if (s.indexOf(",") >= 0 || s.indexOf('"') >= 0 || s.indexOf("\n") >= 0) {
+      return '"' + s.replace(/"/g, '""') + '"';
+    }
+    return s;
+  }
+
   function exportJobsCSV() {
     var jobs = getFilteredJobs();
     if (jobs.length === 0) return;
-
-    function csvEscape(val) {
-      var s = String(val || "");
-      if (s.indexOf(",") >= 0 || s.indexOf('"') >= 0 || s.indexOf("\n") >= 0) {
-        return '"' + s.replace(/"/g, '""') + '"';
-      }
-      return s;
-    }
 
     var rows = ["Title,Company,Location,Type,Commute (min),URL"];
     jobs.forEach(function (job) {
@@ -1100,7 +1152,7 @@
         csvEscape(job.location),
         csvEscape(getWorkplaceLabel(job.workplaceType)),
         mins,
-        "https://www.linkedin.com/jobs/view/" + job.jobId
+        "https://www.linkedin.com/jobs/view/" + String(job.jobId).replace(/[^a-zA-Z0-9]/g, '')
       ].join(","));
     });
 
@@ -1377,7 +1429,7 @@
       viewBtn.textContent = t("viewJob");
       viewBtn.addEventListener("click", function (e) {
         e.stopPropagation();
-        window.open("https://www.linkedin.com/jobs/view/" + job.jobId, "_blank");
+        window.open("https://www.linkedin.com/jobs/view/" + String(job.jobId).replace(/[^a-zA-Z0-9]/g, ''), "_blank");
       });
       divider.appendChild(viewBtn);
       card.appendChild(divider);
@@ -1474,6 +1526,7 @@
     clearJobsBtn.addEventListener("click", function () {
       allJobsById = {};
       companyNames = {};
+      companyCache = {};
       pagesScanned = 0;
       saveAccumulatedState();
       if (map && markersLayer) {
@@ -1613,6 +1666,11 @@
         } else {
           setStatus(t("loadingJobData"), true);
         }
+        if (pendingFocusJobId) {
+          var pid = pendingFocusJobId;
+          pendingFocusJobId = null;
+          setTimeout(function () { focusJobOnMap(pid); }, 400);
+        }
       } else if (map) {
         setTimeout(function () { map.invalidateSize(); }, 200);
       }
@@ -1682,20 +1740,28 @@
       var all = getAllJobs();
       setCount(all.length);
       updateFilterChipCounts();
+      if (isFullscreen) renderJobCards();
       var pr = all.filter(function (j) { return j.hasPreciseAddress; }).length;
       setStatus(t("jobsCollected", { total: all.length, precise: pr }));
     }
-
-    if (isFullscreen) renderJobCards();
   }
 
   function scanCurrentPage() {
-    if (isLoading) return;
+    if (isLoading) {
+      pendingScanAfterLoad = true;
+      return;
+    }
+    pendingScanAfterLoad = false;
     isLoading = true;
+
+    if (scanAbortController) scanAbortController.abort();
+    scanAbortController = new AbortController();
+
     var csrf = getCsrfToken();
     if (!csrf) {
       isLoading = false;
       setStatus(t("csrfNotFound"));
+      if (pendingScanAfterLoad) { pendingScanAfterLoad = false; scanCurrentPage(); }
       return;
     }
 
@@ -1705,16 +1771,19 @@
         pagesScanned++;
         mergeAndDisplay(newGeoJobs);
       }
+      if (pendingScanAfterLoad) { pendingScanAfterLoad = false; scanCurrentPage(); }
     }).catch(function (err) {
       isLoading = false;
-      console.warn("LJM scan error:", err);
+      if (err && err.name !== "AbortError") console.warn("LJM scan error:", err);
+      if (pendingScanAfterLoad) { pendingScanAfterLoad = false; scanCurrentPage(); }
     });
   }
 
   // ── URL change detection ──
 
   function startUrlWatcher() {
-    setInterval(function () {
+    if (urlWatcherInterval) return;
+    urlWatcherInterval = setInterval(function () {
       if (location.href !== lastUrl) {
         lastUrl = location.href;
         setTimeout(function () {
@@ -1729,16 +1798,62 @@
   // ── MutationObserver for scroll-loaded jobs ──
 
   function reattachJobListObserver() {
+    if (debouncedObserverFn) { debouncedObserverFn.cancel(); }
     if (jobListObserver) { jobListObserver.disconnect(); jobListObserver = null; }
     var jobList = document.querySelector(".jobs-search-results-list, .scaffold-layout__list");
     if (!jobList) return;
-    jobListObserver = new MutationObserver(debounce(function () {
+    debouncedObserverFn = debounce(function () {
       if (!isLoading) {
         setStatus(t("newJobsDetected"), true);
         scanCurrentPage();
       }
-    }, 3000));
+    }, 3000);
+    jobListObserver = new MutationObserver(debouncedObserverFn);
     jobListObserver.observe(jobList, { childList: true, subtree: true });
+  }
+
+  // ── Token Required UI ──
+
+  function showTokenRequiredUI() {
+    var btn = document.createElement("button");
+    btn.id = "ljm-toggle-btn";
+    btn.textContent = "\uD83D\uDDFA";
+    btn.setAttribute("data-tooltip", t("openJobMap"));
+    btn.classList.add("ljm-tip-left");
+    document.body.appendChild(btn);
+
+    var notice = document.createElement("div");
+    notice.id = "ljm-token-notice";
+    notice.style.cssText = "position:fixed;bottom:80px;right:20px;z-index:10000;background:rgba(22,33,62,0.95);border:1px solid #0f3460;border-radius:12px;padding:16px 20px;color:#e8e8e8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:14px;max-width:340px;backdrop-filter:blur(12px);box-shadow:0 8px 32px rgba(0,0,0,0.4);display:none;";
+
+    var msg = document.createElement("p");
+    msg.style.cssText = "margin:0 0 12px 0;line-height:1.5;";
+    msg.textContent = t("tokenRequired");
+    notice.appendChild(msg);
+
+    var settingsBtn = document.createElement("button");
+    settingsBtn.textContent = t("openSettings");
+    settingsBtn.style.cssText = "background:#0a66c2;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;";
+    settingsBtn.addEventListener("click", function () {
+      if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.openOptionsPage) {
+        chrome.runtime.openOptionsPage();
+      }
+    });
+    notice.appendChild(settingsBtn);
+
+    var closeBtn = document.createElement("button");
+    closeBtn.textContent = "\u2715";
+    closeBtn.style.cssText = "position:absolute;top:8px;right:10px;background:none;border:none;color:#8892b0;font-size:16px;cursor:pointer;padding:2px 6px;";
+    closeBtn.addEventListener("click", function () {
+      notice.style.display = "none";
+    });
+    notice.appendChild(closeBtn);
+
+    document.body.appendChild(notice);
+
+    btn.addEventListener("click", function () {
+      notice.style.display = notice.style.display === "none" ? "block" : "none";
+    });
   }
 
   // ── Init ──
@@ -1759,11 +1874,15 @@
 
     if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.sync) {
       chrome.storage.sync.get("mapboxToken", function (data) {
-        if (data && data.mapboxToken) MAPBOX_TOKEN = data.mapboxToken;
-        boot();
+        if (data && data.mapboxToken) {
+          MAPBOX_TOKEN = data.mapboxToken;
+          boot();
+        } else {
+          showTokenRequiredUI();
+        }
       });
     } else {
-      boot();
+      showTokenRequiredUI();
     }
   }
 
@@ -1815,7 +1934,7 @@
         var activeCard = cardsListEl.querySelector(".ljm-card-active");
         if (activeCard) {
           var jid = activeCard.getAttribute("data-ljm-job");
-          if (jid) window.open("https://www.linkedin.com/jobs/view/" + jid, "_blank");
+          if (jid) window.open("https://www.linkedin.com/jobs/view/" + String(jid).replace(/[^a-zA-Z0-9]/g, ''), "_blank");
         }
         return;
       }
@@ -1871,6 +1990,40 @@
       extractJobIds: extractJobIds,
       apiHeaders: apiHeaders,
       buildPopup: buildPopup,
+      renderJobCards: renderJobCards,
+      exportJobsCSV: exportJobsCSV,
+      setStatus: setStatus,
+      setCount: setCount,
+      toggleFullscreen: toggleFullscreen,
+      getCompanyName: getCompanyName,
+      captureCompanyNamesFromDOM: captureCompanyNamesFromDOM,
+      updateFilterChipCounts: updateFilterChipCounts,
+      displayFilteredResults: displayFilteredResults,
+      mergeAndDisplay: mergeAndDisplay,
+      loadPageJobs: loadPageJobs,
+      scanCurrentPage: scanCurrentPage,
+      showRoute: showRoute,
+      clearRoute: clearRoute,
+      refreshPopups: refreshPopups,
+      setMyLocation: setMyLocation,
+      clearMyLocation: clearMyLocation,
+      useGPS: useGPS,
+      focusJobOnMap: focusJobOnMap,
+      focusJobInList: focusJobInList,
+      focusJobInCardsPanel: focusJobInCardsPanel,
+      highlightMarkerRing: highlightMarkerRing,
+      updateMarkers: updateMarkers,
+      setupKeyboardShortcuts: setupKeyboardShortcuts,
+      startUrlWatcher: startUrlWatcher,
+      reattachJobListObserver: reattachJobListObserver,
+      createFilterBar: createFilterBar,
+      createCardsPanel: createCardsPanel,
+      createUI: createUI,
+      initMap: initMap,
+      csvEscape: csvEscape,
+      init: init,
+      boot: boot,
+      showTokenRequiredUI: showTokenRequiredUI,
       _setMyLocation: function (loc) { myLocation = loc; },
       _setAllJobsById: function (jobs) { allJobsById = jobs; },
       _setFilterState: function (state) { filterState = state; },
@@ -1879,9 +2032,28 @@
       _setCompanyNames: function (names) { companyNames = names; },
       _setCompanyCache: function (cache) { companyCache = cache; },
       _setCurrentLocale: function (locale) { currentLocale = locale; },
+      _setIsFullscreen: function (v) { isFullscreen = v; },
+      _setMap: function (m) { map = m; },
+      _setMarkersLayer: function (ml) { markersLayer = ml; },
+      _setMapInitialized: function (v) { mapInitialized = v; },
+      _setIsLoading: function (v) { isLoading = v; },
+      _setCardsListEl: function (el) { cardsListEl = el; },
+      _setCardsBadgeEl: function (el) { cardsBadgeEl = el; },
+      _setCardsFooterTimeEl: function (el) { cardsFooterTimeEl = el; },
+      _setPanelEl: function (el) { panelEl = el; },
+      _setToggleBtnEl: function (el) { toggleBtnEl = el; },
+      _setMyLocationLayer: function (l) { myLocationLayer = l; },
+      _setRouteLayer: function (l) { routeLayer = l; },
+      _setMarkerRefs: function (r) { markerRefs = r; },
+      _setCurrentGeoJobs: function (j) { currentGeoJobs = j; },
+      _setIsSyncing: function (v) { isSyncing = v; },
       _getMyLocation: function () { return myLocation; },
       _getAllJobsById: function () { return allJobsById; },
-      _getCompanyCache: function () { return companyCache; }
+      _getCompanyCache: function () { return companyCache; },
+      _getIsLoading: function () { return isLoading; },
+      _getPendingScanAfterLoad: function () { return pendingScanAfterLoad; },
+      _getMarkerRefs: function () { return markerRefs; },
+      _getCurrentGeoJobs: function () { return currentGeoJobs; }
     };
   } else {
     init();

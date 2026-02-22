@@ -19,6 +19,7 @@ export default [
         Blob: "readonly",
         Promise: "readonly",
         MutationObserver: "readonly",
+        AbortController: "readonly",
         chrome: "readonly",
         L: "readonly",
         console: "readonly",

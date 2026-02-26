@@ -177,7 +177,7 @@ LinkedIn Job Map is built with privacy as a core principle:
 - **No external servers** -- All processing happens locally in your browser
 - **No account required** -- The extension works immediately after installation
 - **Local caching only** -- Geocoding results are stored in your browser's `localStorage` and never transmitted
-- **Minimal permissions** -- Only requests `activeTab` and `storage`; network access is limited to Mapbox (geocoding/tiles) and OSRM (routing)
+- **Minimal permissions** -- Only requests `storage`; network access is limited to Mapbox (geocoding/tiles) and OSRM (routing)
 
 ---
 

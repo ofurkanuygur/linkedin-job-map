@@ -36,7 +36,6 @@ No personal information is shared with these services.
 
 ## Permissions
 
-- **activeTab**: Access the current LinkedIn Jobs page to read job listing data
 - **storage**: Save your Mapbox API token preference (configured in the Options page)
 - **Host permissions**: Connect to LinkedIn's API (job data), Mapbox (maps/geocoding), and OSRM (routing)
 

@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
   "name": "LinkedIn Job Map",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "Visualize LinkedIn job listings on an interactive map with routing, commute estimation & workplace filtering",
-  "permissions": ["activeTab", "storage"],
+  "permissions": ["storage"],
   "host_permissions": [
     "https://www.linkedin.com/voyager/api/*",
     "https://router.project-osrm.org/*",

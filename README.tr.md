@@ -199,7 +199,7 @@ LinkedIn Job Map, temel ilke olarak gizlilik ile tasarlanmıştır:
 - **Harici sunucu yok** -- Tüm işlemler tarayıcınızda yerel olarak gerçekleşir
 - **Hesap gerektirmez** -- Eklenti kurulumdan hemen sonra çalışır
 - **Yalnızca yerel önbellekleme** -- Geocoding sonuçları tarayıcınızın `localStorage`'ında saklanır ve asla iletilmez
-- **Minimum izinler** -- Yalnızca `activeTab` ve `storage` ister; ağ erişimi Mapbox (geocoding/karolar) ve OSRM (rotalama) ile sınırlıdır
+- **Minimum izinler** -- Yalnızca `storage` ister; ağ erişimi Mapbox (geocoding/karolar) ve OSRM (rotalama) ile sınırlıdır
 
 ---
 

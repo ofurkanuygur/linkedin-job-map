@@ -6,7 +6,7 @@
 
 LinkedIn iş ilanlarını interaktif, karanlık temalı bir harita üzerinde görüntüleyen bir Chrome Eklentisi -- böylece işlerin sadece ne olduğunu değil, *nerede* olduğunu da anlayabilirsiniz.
 
-[![Chrome Web Store Version](https://img.shields.io/chrome-web-store/v/placeholder?style=for-the-badge&logo=googlechrome&logoColor=white&label=Chrome%20Web%20Store&color=0a66c2)](https://chrome.google.com/webstore/detail/placeholder)
+[![Chrome Web Store Version](https://img.shields.io/chrome-web-store/v/bhincffgniejoocchagkfcnocinjcohf?style=for-the-badge&logo=googlechrome&logoColor=white&label=Chrome%20Web%20Store&color=0a66c2)](https://chromewebstore.google.com/detail/linkedin-job-map/bhincffgniejoocchagkfcnocinjcohf)
 [![License: MIT](https://img.shields.io/badge/License-MIT-10b981?style=for-the-badge)](LICENSE)
 [![Manifest V3](https://img.shields.io/badge/Manifest-V3-a855f7?style=for-the-badge&logo=googlechrome&logoColor=white)](https://developer.chrome.com/docs/extensions/mv3/)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Uyumlu-0a66c2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/jobs/)
@@ -89,9 +89,9 @@ LinkedIn iş ilanlarını interaktif, karanlık temalı bir harita üzerinde gö
 
 ### Chrome Web Mağaza'dan (Önerilen)
 
-1. Chrome Web Mağaza'da [LinkedIn Job Map](https://chrome.google.com/webstore/detail/placeholder) sayfasını ziyaret edin
+1. Chrome Web Mağaza'da [LinkedIn Job Map](https://chromewebstore.google.com/detail/linkedin-job-map/bhincffgniejoocchagkfcnocinjcohf) sayfasını ziyaret edin
 2. **Chrome'a Ekle** butonuna tıklayın
-3. Herhangi bir [LinkedIn İş Arama sayfasına](https://www.linkedin.com/jobs/) gidin ve görünen **Haritayı Aç** butonuna tıklayın
+3. Herhangi bir [LinkedIn Jobs sayfasına](https://www.linkedin.com/jobs/collections) (`linkedin.com/jobs/...`) gidin -- eklenti otomatik devreye girer ve **Haritayı Aç** butonu belirir
 
 ### Manuel Kurulum (Geliştirici Modu)
 
@@ -102,13 +102,13 @@ LinkedIn iş ilanlarını interaktif, karanlık temalı bir harita üzerinde gö
 2. Chrome'da `chrome://extensions` adresine gidin
 3. Sağ üst köşedeki **Geliştirici modu** toggle'ını aktif edin
 4. **Paketlenmemiş öğe yükle** butonuna tıklayın ve klonlanan `linkedin-job-map` klasörünü seçin
-5. Herhangi bir [LinkedIn İş Arama sayfasına](https://www.linkedin.com/jobs/) gidin -- eklenti otomatik olarak etkinleşir
+5. Herhangi bir [LinkedIn Jobs sayfasına](https://www.linkedin.com/jobs/collections) gidin -- eklenti otomatik olarak etkinleşir
 
 ---
 
 ## Kullanım
 
-1. LinkedIn'de normalde yaptığınız gibi **iş arayın** (`linkedin.com/jobs/...`)
+1. **LinkedIn Jobs sayfasına gidin** -- Eklenti, `linkedin.com/jobs/...` sayfalarında otomatik olarak devreye girer (örn. [linkedin.com/jobs/collections](https://www.linkedin.com/jobs/collections)). Normalde yaptığınız gibi iş arayın.
 2. Sayfanın alt kısmında görünen **"Haritayı Aç"** butonuna tıklayın
 3. Harita paneli açılır -- işler otomatik olarak alınır, geocode edilir ve haritaya yerleştirilir
 4. GPS butonu ile veya haritaya tıklayarak **konumunuzu belirleyin**

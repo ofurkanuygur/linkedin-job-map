@@ -6,7 +6,7 @@
 
 A Chrome Extension that brings LinkedIn job listings to life on an interactive, dark-themed map -- so you can finally understand *where* the jobs are, not just what they are.
 
-[![Chrome Web Store Version](https://img.shields.io/chrome-web-store/v/placeholder?style=for-the-badge&logo=googlechrome&logoColor=white&label=Chrome%20Web%20Store&color=0a66c2)](https://chrome.google.com/webstore/detail/placeholder)
+[![Chrome Web Store Version](https://img.shields.io/chrome-web-store/v/bhincffgniejoocchagkfcnocinjcohf?style=for-the-badge&logo=googlechrome&logoColor=white&label=Chrome%20Web%20Store&color=0a66c2)](https://chromewebstore.google.com/detail/linkedin-job-map/bhincffgniejoocchagkfcnocinjcohf)
 [![License: MIT](https://img.shields.io/badge/License-MIT-10b981?style=for-the-badge)](LICENSE)
 [![Tests](https://img.shields.io/badge/Tests-414%20passed-10b981?style=for-the-badge&logo=vitest&logoColor=white)](tests/)
 [![Coverage](https://img.shields.io/badge/Coverage-79%25-10b981?style=for-the-badge&logo=vitest&logoColor=white)](coverage/)
@@ -90,9 +90,9 @@ A Chrome Extension that brings LinkedIn job listings to life on an interactive, 
 
 ### From Chrome Web Store (Recommended)
 
-1. Visit the [LinkedIn Job Map](https://chrome.google.com/webstore/detail/placeholder) listing on the Chrome Web Store
+1. Visit the [LinkedIn Job Map](https://chromewebstore.google.com/detail/linkedin-job-map/bhincffgniejoocchagkfcnocinjcohf) listing on the Chrome Web Store
 2. Click **Add to Chrome**
-3. Navigate to any [LinkedIn Jobs search page](https://www.linkedin.com/jobs/) and click the **Open Job Map** button that appears
+3. Navigate to any [LinkedIn Jobs page](https://www.linkedin.com/jobs/collections) (`linkedin.com/jobs/...`) -- the extension activates automatically and an **Open Job Map** button appears
 
 ### Manual Installation (Developer Mode)
 
@@ -103,13 +103,13 @@ A Chrome Extension that brings LinkedIn job listings to life on an interactive, 
 2. Open Chrome and navigate to `chrome://extensions`
 3. Enable **Developer mode** (toggle in the top-right corner)
 4. Click **Load unpacked** and select the cloned `linkedin-job-map` folder
-5. Navigate to any [LinkedIn Jobs search page](https://www.linkedin.com/jobs/) -- the extension activates automatically
+5. Navigate to any [LinkedIn Jobs page](https://www.linkedin.com/jobs/collections) -- the extension activates automatically
 
 ---
 
 ## Usage
 
-1. **Search for jobs** on LinkedIn as you normally would (`linkedin.com/jobs/...`)
+1. **Go to LinkedIn Jobs** -- The extension activates automatically on any `linkedin.com/jobs/...` page (e.g. [linkedin.com/jobs/collections](https://www.linkedin.com/jobs/collections)). Search for jobs as you normally would.
 2. A floating **"Open Job Map"** button appears at the bottom of the page
 3. Click it to open the map panel -- jobs are automatically fetched, geocoded, and plotted
 4. **Set your location** by clicking the GPS button or clicking directly on the map

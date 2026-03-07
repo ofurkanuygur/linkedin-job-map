@@ -2,29 +2,85 @@
    LinkedIn Job Map – Stitch 2 Design System
    ═══════════════════════════════════════════ */
 
-/* ── Toggle Button ── */
+/* ── Toggle Button (Enhanced FAB) ── */
 #ljm-toggle-btn {
   position: fixed;
-  bottom: 24px;
+  bottom: 80px;
   right: 24px;
   z-index: 10000;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: #0a66c2;
+  height: 52px;
+  min-width: 52px;
+  padding: 0 14px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #0a66c2, #004182);
   color: #fff;
   border: none;
-  font-size: 20px;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.35);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.2s, box-shadow 0.2s;
+  gap: 8px;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: min-width 0.3s cubic-bezier(.4,0,.2,1),
+              padding 0.3s cubic-bezier(.4,0,.2,1),
+              box-shadow 0.25s ease,
+              transform 0.2s ease;
+}
+#ljm-toggle-btn .ljm-fab-icon {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+}
+#ljm-toggle-btn .ljm-fab-label {
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-width 0.3s cubic-bezier(.4,0,.2,1),
+              opacity 0.25s ease;
+}
+#ljm-toggle-btn:hover .ljm-fab-label {
+  max-width: 120px;
+  opacity: 1;
 }
 #ljm-toggle-btn:hover {
-  transform: scale(1.08);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+  min-width: 140px;
+  box-shadow: 0 6px 24px rgba(10,102,194,0.4);
+  transform: translateY(-2px);
+}
+#ljm-toggle-btn .ljm-fab-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: #e74c3c;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 20px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity 0.25s ease, transform 0.25s cubic-bezier(.4,0,.2,1);
+}
+#ljm-toggle-btn .ljm-fab-badge.ljm-fab-badge-visible {
+  opacity: 1;
+  transform: scale(1);
+}
+@keyframes ljm-fab-pulse {
+  0%, 100% { box-shadow: 0 4px 14px rgba(0,0,0,0.35); }
+  50% { box-shadow: 0 4px 24px rgba(10,102,194,0.6), 0 0 0 8px rgba(10,102,194,0.15); }
+}
+#ljm-toggle-btn.ljm-fab-pulse {
+  animation: ljm-fab-pulse 2s ease-in-out 3;
 }
 body.ljm-fs-active #ljm-toggle-btn {
   display: none;
@@ -152,26 +208,26 @@ body.ljm-fs-active {
 .ljm-header-actions {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
 }
 
 .ljm-header-btn {
   background: none;
   border: none;
   color: #9ca3af;
-  font-size: 15px;
   cursor: pointer;
-  padding: 5px 6px;
-  border-radius: 4px;
+  padding: 7px;
+  border-radius: 8px;
   line-height: 1;
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.15s, color 0.15s, transform 0.15s;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 .ljm-header-btn:hover {
-  background: #374151;
+  background: rgba(255,255,255,0.08);
   color: #fff;
+  transform: scale(1.1);
 }
 
 /* ── Tooltip System ── */
@@ -274,6 +330,10 @@ body.ljm-fs-active {
   position: absolute;
   top: 0;
   left: 0;
+  background: #1d2226;
+}
+#ljm-map-container.leaflet-container {
+  background: #1d2226;
 }
 
 /* ── Map Controls ── */

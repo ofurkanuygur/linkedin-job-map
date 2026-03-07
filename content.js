@@ -1451,12 +1451,39 @@
   // ── UI ──
 
   function createUI() {
-    // Toggle button
+    // Toggle button (Enhanced FAB)
     toggleBtnEl = document.createElement("button");
     toggleBtnEl.id = "ljm-toggle-btn";
-    toggleBtnEl.textContent = "\uD83D\uDDFA";
     toggleBtnEl.setAttribute("data-tooltip", t("openJobMap"));
     toggleBtnEl.classList.add("ljm-tip-left");
+
+    var fabIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    fabIcon.setAttribute("viewBox", "0 0 24 24");
+    fabIcon.setAttribute("fill", "none");
+    fabIcon.setAttribute("stroke", "currentColor");
+    fabIcon.setAttribute("stroke-width", "2");
+    fabIcon.setAttribute("stroke-linecap", "round");
+    fabIcon.setAttribute("stroke-linejoin", "round");
+    fabIcon.classList.add("ljm-fab-icon");
+    fabIcon.innerHTML = '<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>';
+    toggleBtnEl.appendChild(fabIcon);
+
+    var fabLabel = document.createElement("span");
+    fabLabel.className = "ljm-fab-label";
+    fabLabel.textContent = "Job Map";
+    toggleBtnEl.appendChild(fabLabel);
+
+    var fabBadge = document.createElement("span");
+    fabBadge.className = "ljm-fab-badge";
+    fabBadge.id = "ljm-fab-badge";
+    fabBadge.textContent = "0";
+    toggleBtnEl.appendChild(fabBadge);
+
+    toggleBtnEl.classList.add("ljm-fab-pulse");
+    toggleBtnEl.addEventListener("animationend", function () {
+      toggleBtnEl.classList.remove("ljm-fab-pulse");
+    });
+
     document.body.appendChild(toggleBtnEl);
 
     // Panel
@@ -1511,7 +1538,7 @@
 
     var refreshBtn = document.createElement("button");
     refreshBtn.className = "ljm-header-btn";
-    refreshBtn.textContent = "\u21BB";
+    refreshBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>';
     refreshBtn.setAttribute("data-tooltip", t("rescanJobs"));
     refreshBtn.addEventListener("click", function () {
       shouldFitBoundsNext = true;
@@ -1519,35 +1546,11 @@
     });
     actions.appendChild(refreshBtn);
 
-    var clearJobsBtn = document.createElement("button");
-    clearJobsBtn.className = "ljm-header-btn";
-    clearJobsBtn.textContent = "\u2298";
-    clearJobsBtn.setAttribute("data-tooltip", t("clearJobs"));
-    clearJobsBtn.addEventListener("click", function () {
-      allJobsById = {};
-      companyNames = {};
-      companyCache = {};
-      pagesScanned = 0;
-      saveAccumulatedState();
-      if (map && markersLayer) {
-        markersLayer.clearLayers();
-        clearRoute();
-        markerRefs = {};
-        currentGeoJobs = [];
-      }
-      shouldFitBoundsNext = true;
-      setCount(0);
-      if (isFullscreen) renderJobCards([]);
-      setStatus(t("allJobsCleared"));
-      scanCurrentPage();
-    });
-    actions.appendChild(clearJobsBtn);
-
-    var clearCacheBtn = document.createElement("button");
-    clearCacheBtn.className = "ljm-header-btn";
-    clearCacheBtn.textContent = "\uD83D\uDDD1";
-    clearCacheBtn.setAttribute("data-tooltip", t("clearAllCache"));
-    clearCacheBtn.addEventListener("click", function () {
+    var clearBtn = document.createElement("button");
+    clearBtn.className = "ljm-header-btn";
+    clearBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
+    clearBtn.setAttribute("data-tooltip", t("clearAllCache"));
+    clearBtn.addEventListener("click", function () {
       try { localStorage.removeItem(GEOCODE_CACHE_KEY); } catch (e) {}
       allJobsById = {};
       companyNames = {};
@@ -1566,19 +1569,19 @@
       setStatus(t("allCacheCleared"));
       scanCurrentPage();
     });
-    actions.appendChild(clearCacheBtn);
+    actions.appendChild(clearBtn);
 
     var fsBtn = document.createElement("button");
     fsBtn.id = "ljm-fs-btn";
     fsBtn.className = "ljm-header-btn";
-    fsBtn.textContent = "\u26F6";
+    fsBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>';
     fsBtn.setAttribute("data-tooltip", t("fullscreen"));
     fsBtn.addEventListener("click", toggleFullscreen);
     actions.appendChild(fsBtn);
 
     var closeBtn = document.createElement("button");
     closeBtn.className = "ljm-header-btn";
-    closeBtn.textContent = "\u2715";
+    closeBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
     closeBtn.setAttribute("data-tooltip", t("closePanel"));
     closeBtn.addEventListener("click", function () {
       if (isFullscreen) toggleFullscreen();
@@ -1694,6 +1697,15 @@
   function setCount(n) {
     var el = document.getElementById("ljm-count");
     if (el) el.textContent = String(n);
+    var fabBadge = document.getElementById("ljm-fab-badge");
+    if (fabBadge) {
+      fabBadge.textContent = String(n);
+      if (n > 0) {
+        fabBadge.classList.add("ljm-fab-badge-visible");
+      } else {
+        fabBadge.classList.remove("ljm-fab-badge-visible");
+      }
+    }
   }
 
   // ── Main Logic ──
@@ -1817,9 +1829,30 @@
   function showTokenRequiredUI() {
     var btn = document.createElement("button");
     btn.id = "ljm-toggle-btn";
-    btn.textContent = "\uD83D\uDDFA";
     btn.setAttribute("data-tooltip", t("openJobMap"));
     btn.classList.add("ljm-tip-left");
+
+    var fabIcon2 = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    fabIcon2.setAttribute("viewBox", "0 0 24 24");
+    fabIcon2.setAttribute("fill", "none");
+    fabIcon2.setAttribute("stroke", "currentColor");
+    fabIcon2.setAttribute("stroke-width", "2");
+    fabIcon2.setAttribute("stroke-linecap", "round");
+    fabIcon2.setAttribute("stroke-linejoin", "round");
+    fabIcon2.classList.add("ljm-fab-icon");
+    fabIcon2.innerHTML = '<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>';
+    btn.appendChild(fabIcon2);
+
+    var fabLabel2 = document.createElement("span");
+    fabLabel2.className = "ljm-fab-label";
+    fabLabel2.textContent = "Job Map";
+    btn.appendChild(fabLabel2);
+
+    btn.classList.add("ljm-fab-pulse");
+    btn.addEventListener("animationend", function () {
+      btn.classList.remove("ljm-fab-pulse");
+    });
+
     document.body.appendChild(btn);
 
     var notice = document.createElement("div");
@@ -1881,6 +1914,8 @@
           showTokenRequiredUI();
         }
       });
+    } else if (MAPBOX_TOKEN) {
+      boot();
     } else {
       showTokenRequiredUI();
     }

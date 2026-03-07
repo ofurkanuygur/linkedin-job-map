@@ -47,8 +47,8 @@ A Chrome Extension that brings LinkedIn job listings to life on an interactive, 
 - **OSRM Routing** -- Real driving/cycling route overlay between your location and any job
 - **Bilingual UI** -- Full English and Turkish interface, auto-detected from browser language
 - **Dark Glassmorphism Theme** -- A polished, modern design that feels native to LinkedIn's dark mode
-- **Cache Management** -- Geocoding results cached locally; clear per-job or all caches from the header
-- **Custom Mapbox Token** -- Use the built-in token or configure your own for higher rate limits
+- **Cache Management** -- Geocoding results cached locally; clear all caches from the header
+- **Custom Mapbox Token** -- Configure your own Mapbox token via extension settings
 
 ---
 
@@ -110,7 +110,7 @@ A Chrome Extension that brings LinkedIn job listings to life on an interactive, 
 ## Usage
 
 1. **Go to LinkedIn Jobs** -- The extension activates automatically on any `linkedin.com/jobs/...` page (e.g. [linkedin.com/jobs/collections](https://www.linkedin.com/jobs/collections)). Search for jobs as you normally would.
-2. A floating **"Open Job Map"** button appears at the bottom of the page
+2. A floating **Job Map** button appears at the bottom-right -- hover to see the label, with a badge showing found job count
 3. Click it to open the map panel -- jobs are automatically fetched, geocoded, and plotted
 4. **Set your location** by clicking the GPS button or clicking directly on the map
 5. **Filter** by workplace type using the colored chips (On-site / Hybrid / Remote)
@@ -125,9 +125,9 @@ A Chrome Extension that brings LinkedIn job listings to life on an interactive, 
 
 ## Configuration
 
-### Mapbox Access Token
+### Mapbox Access Token (Required)
 
-The extension ships with a default Mapbox token that works out of the box. For heavy usage or higher rate limits, you can provide your own:
+The extension requires a Mapbox token for map tiles and geocoding. Setting it up is free and takes 2 minutes:
 
 1. Create a free account at [mapbox.com](https://www.mapbox.com/)
 2. Copy your **default public token** from the [tokens page](https://account.mapbox.com/access-tokens/)

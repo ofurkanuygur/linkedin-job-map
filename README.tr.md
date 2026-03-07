@@ -46,7 +46,7 @@ LinkedIn iş ilanlarını interaktif, karanlık temalı bir harita üzerinde gö
 - **İki Dilli Arayüz** -- Tam İngilizce ve Türkçe arayüz, tarayıcı dilinden otomatik algılanır
 - **Karanlık Glassmorphism Teması** -- LinkedIn'in karanlık moduna uyumlu, modern ve cilalı tasarım
 - **Önbellek Yönetimi** -- Geocoding sonuçları yerel olarak önbelleğe alınır; başlıktan tüm önbelleği temizleyin
-- **Özel Mapbox Anahtarı** -- Yerleşik anahtarı kullanın veya daha yüksek hız limitleri için kendinizinkini yapılandırın
+- **Özel Mapbox Anahtarı** -- Eklenti ayarlarından kendi Mapbox anahtarınızı yapılandırın
 
 ---
 
@@ -109,8 +109,8 @@ LinkedIn iş ilanlarını interaktif, karanlık temalı bir harita üzerinde gö
 ## Kullanım
 
 1. **LinkedIn Jobs sayfasına gidin** -- Eklenti, `linkedin.com/jobs/...` sayfalarında otomatik olarak devreye girer (örn. [linkedin.com/jobs/collections](https://www.linkedin.com/jobs/collections)). Normalde yaptığınız gibi iş arayın.
-2. Sayfanın alt kısmında görünen **"Haritayı Aç"** butonuna tıklayın
-3. Harita paneli açılır -- işler otomatik olarak alınır, geocode edilir ve haritaya yerleştirilir
+2. Sağ alt köşede **Job Map** butonu belirir -- üzerine gelin etiketi görün, badge ile bulunan iş sayısını takip edin
+3. Tıklayarak harita panelini açın -- işler otomatik olarak alınır, geocode edilir ve haritaya yerleştirilir
 4. GPS butonu ile veya haritaya tıklayarak **konumunuzu belirleyin**
 5. Renkli çiplerle (Yerinde / Hibrit / Uzaktan) çalışma türüne göre **filtreleyin**
 6. Başlık, şirket veya konuma göre filtrelemek için arama çubuğuna **yazın**
@@ -124,9 +124,9 @@ LinkedIn iş ilanlarını interaktif, karanlık temalı bir harita üzerinde gö
 
 ## Yapılandırma
 
-### Mapbox Erişim Anahtarı
+### Mapbox Erişim Anahtarı (Gerekli)
 
-Eklenti, kutudan çıkar çıkmaz çalışan varsayılan bir Mapbox anahtarı ile gelir. Yoğun kullanım veya daha yüksek hız limitleri için kendinizinkini sağlayabilirsiniz:
+Eklenti, harita karoları ve geocoding için bir Mapbox anahtarı gerektirir. Kurulumu ücretsiz ve 2 dakika sürer:
 
 1. [mapbox.com](https://www.mapbox.com/) adresinde ücretsiz bir hesap oluşturun
 2. [Anahtarlar sayfasından](https://account.mapbox.com/access-tokens/) **varsayılan genel anahtarınızı** kopyalayın

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "LinkedIn Job Map",
-  "version": "3.1.2",
+  "version": "3.2.0",
   "description": "Visualize LinkedIn job listings on an interactive map with routing, commute estimation & workplace filtering",
   "permissions": ["storage"],
   "host_permissions": [

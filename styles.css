@@ -88,6 +88,25 @@ body.ljm-fs-active #ljm-toggle-btn {
 
 /* ── Panel ── */
 #ljm-panel {
+  /* -- Theme Variables (Dark default) -- */
+  --ljm-bg-primary: #1d2226;
+  --ljm-bg-secondary: #24292e;
+  --ljm-bg-header: rgba(20, 24, 28, 0.94);
+  --ljm-bg-input: #1c2128;
+  --ljm-bg-hover: #2d333b;
+  --ljm-text-primary: #e1e4e8;
+  --ljm-text-secondary: #9ca3af;
+  --ljm-text-muted: #6b7280;
+  --ljm-border-primary: #444c56;
+  --ljm-border-active: #0a66c2;
+  --ljm-brand: #0a66c2;
+  --ljm-brand-hover: #0855a1;
+  --ljm-popup-bg: #1f2937;
+  --ljm-popup-border: #374151;
+  --ljm-success: #10b981;
+  --ljm-warning: #f59e0b;
+  --ljm-danger: #ef4444;
+
   position: fixed;
   top: 0;
   right: 0;
@@ -95,7 +114,7 @@ body.ljm-fs-active #ljm-toggle-btn {
   max-width: 100vw;
   height: 100vh;
   z-index: 9999;
-  background: #1d2226;
+  background: var(--ljm-bg-primary);
   box-shadow: -4px 0 24px rgba(0,0,0,0.5);
   display: flex;
   flex-direction: column;
@@ -127,10 +146,10 @@ body.ljm-fs-active {
   justify-content: space-between;
   padding: 0 16px;
   height: 44px;
-  background: rgba(20, 24, 28, 0.94);
+  background: var(--ljm-bg-header);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border-bottom: 1px solid #374151;
+  border-bottom: 1px solid var(--ljm-popup-border);
   flex-shrink: 0;
   z-index: 10;
 }
@@ -144,13 +163,13 @@ body.ljm-fs-active {
 .ljm-header-title {
   font-size: 13px;
   font-weight: 600;
-  color: #fff;
+  color: var(--ljm-text-primary);
   white-space: nowrap;
 }
 
 .ljm-badge {
   display: inline-block;
-  background: #0a66c2;
+  background: var(--ljm-brand);
   color: #fff;
   font-size: 11px;
   font-weight: 700;
@@ -163,7 +182,7 @@ body.ljm-fs-active {
 .ljm-divider {
   width: 1px;
   height: 16px;
-  background: #4b5563;
+  background: var(--ljm-text-muted);
 }
 
 .ljm-legend-inline {
@@ -177,12 +196,12 @@ body.ljm-fs-active {
   align-items: center;
   gap: 5px;
   font-size: 11px;
-  color: #9ca3af;
+  color: var(--ljm-text-secondary);
   cursor: default;
   transition: color 0.15s;
 }
 .ljm-legend-item:hover {
-  color: #e1e4e8;
+  color: var(--ljm-text-primary);
 }
 
 .ljm-legend-dot {
@@ -214,7 +233,7 @@ body.ljm-fs-active {
 .ljm-header-btn {
   background: none;
   border: none;
-  color: #9ca3af;
+  color: var(--ljm-text-secondary);
   cursor: pointer;
   padding: 7px;
   border-radius: 8px;
@@ -226,7 +245,7 @@ body.ljm-fs-active {
 }
 .ljm-header-btn:hover {
   background: rgba(255,255,255,0.08);
-  color: #fff;
+  color: var(--ljm-text-primary);
   transform: scale(1.1);
 }
 
@@ -241,7 +260,7 @@ body.ljm-fs-active {
   left: 50%;
   transform: translateX(-50%) scale(0.92);
   background: #0d1117;
-  color: #e1e4e8;
+  color: var(--ljm-text-primary);
   font-size: 11px;
   font-weight: 500;
   padding: 5px 10px;
@@ -321,7 +340,7 @@ body.ljm-fs-active {
   position: relative;
   min-width: 0;
   min-height: 0;
-  background: #1d2226;
+  background: var(--ljm-bg-primary);
 }
 
 #ljm-map-container {
@@ -330,10 +349,10 @@ body.ljm-fs-active {
   position: absolute;
   top: 0;
   left: 0;
-  background: #1d2226;
+  background: var(--ljm-bg-primary);
 }
 #ljm-map-container.leaflet-container {
-  background: #1d2226;
+  background: var(--ljm-bg-primary);
 }
 
 /* ── Map Controls ── */
@@ -350,8 +369,8 @@ body.ljm-fs-active {
 .ljm-ctrl-group {
   display: flex;
   flex-direction: column;
-  background: #1d2226;
-  border: 1px solid #4b5563;
+  background: var(--ljm-bg-primary);
+  border: 1px solid var(--ljm-text-muted);
   border-radius: 6px;
   overflow: visible;
   box-shadow: 0 4px 12px rgba(0,0,0,0.4);
@@ -360,9 +379,9 @@ body.ljm-fs-active {
 .ljm-ctrl-btn {
   width: 32px;
   height: 32px;
-  background: #1d2226;
+  background: var(--ljm-bg-primary);
   border: none;
-  color: #e1e4e8;
+  color: var(--ljm-text-primary);
   font-size: 18px;
   cursor: pointer;
   display: flex;
@@ -371,19 +390,19 @@ body.ljm-fs-active {
   transition: background 0.15s;
 }
 .ljm-ctrl-btn:hover {
-  background: #374151;
+  background: var(--ljm-popup-border);
 }
 .ljm-ctrl-btn + .ljm-ctrl-btn {
-  border-top: 1px solid #4b5563;
+  border-top: 1px solid var(--ljm-text-muted);
 }
 
 .ljm-ctrl-single {
   width: 32px;
   height: 32px;
-  background: #1d2226;
-  border: 1px solid #4b5563;
+  background: var(--ljm-bg-primary);
+  border: 1px solid var(--ljm-text-muted);
   border-radius: 6px;
-  color: #e1e4e8;
+  color: var(--ljm-text-primary);
   font-size: 16px;
   cursor: pointer;
   display: flex;
@@ -393,16 +412,16 @@ body.ljm-fs-active {
   transition: background 0.15s;
 }
 .ljm-ctrl-single:hover {
-  background: #374151;
+  background: var(--ljm-popup-border);
 }
 
 /* ── Status Bar ── */
 #ljm-status {
   padding: 6px 16px;
   font-size: 11px;
-  color: #9ca3af;
+  color: var(--ljm-text-secondary);
   background: #14181c;
-  border-top: 1px solid #374151;
+  border-top: 1px solid var(--ljm-popup-border);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -416,8 +435,8 @@ body.ljm-fs-active {
 .ljm-spinner {
   width: 12px;
   height: 12px;
-  border: 2px solid #374151;
-  border-top-color: #0a66c2;
+  border: 2px solid var(--ljm-popup-border);
+  border-top-color: var(--ljm-brand);
   border-radius: 50%;
   animation: ljm-spin 0.8s linear infinite;
   flex-shrink: 0;
@@ -432,8 +451,8 @@ body.ljm-fs-active {
   width: 384px;
   flex-shrink: 0;
   flex-direction: column;
-  background: #24292e;
-  border-left: 1px solid #444c56;
+  background: var(--ljm-bg-secondary);
+  border-left: 1px solid var(--ljm-border-primary);
   overflow: hidden;
 }
 #ljm-panel.ljm-fullscreen #ljm-cards-panel {
@@ -442,8 +461,8 @@ body.ljm-fs-active {
 
 .ljm-cards-header {
   padding: 16px;
-  border-bottom: 1px solid #444c56;
-  background: #24292e;
+  border-bottom: 1px solid var(--ljm-border-primary);
+  background: var(--ljm-bg-secondary);
   flex-shrink: 0;
 }
 
@@ -456,15 +475,15 @@ body.ljm-fs-active {
 .ljm-cards-title {
   font-size: 16px;
   font-weight: 700;
-  color: #fff;
+  color: var(--ljm-text-primary);
   display: flex;
   align-items: center;
 }
 
 .ljm-export-btn {
   background: none;
-  border: 1px solid #374151;
-  color: #9ca3af;
+  border: 1px solid var(--ljm-popup-border);
+  color: var(--ljm-text-secondary);
   font-size: 14px;
   cursor: pointer;
   padding: 4px 8px;
@@ -475,13 +494,13 @@ body.ljm-fs-active {
   justify-content: center;
 }
 .ljm-export-btn:hover {
-  background: #374151;
-  color: #fff;
+  background: var(--ljm-popup-border);
+  color: var(--ljm-text-primary);
 }
 
 .ljm-cards-badge {
   background: rgba(10, 102, 194, 0.15);
-  color: #0a66c2;
+  color: var(--ljm-brand);
   font-size: 11px;
   font-weight: 600;
   padding: 2px 8px;
@@ -513,10 +532,10 @@ body.ljm-fs-active {
 
 .ljm-cards-footer {
   padding: 8px 16px;
-  background: #24292e;
-  border-top: 1px solid #444c56;
+  background: var(--ljm-bg-secondary);
+  border-top: 1px solid var(--ljm-border-primary);
   font-size: 10px;
-  color: #9ca3af;
+  color: var(--ljm-text-secondary);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -527,26 +546,26 @@ body.ljm-fs-active {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #10b981;
+  background: var(--ljm-success);
   display: inline-block;
   margin-right: 4px;
 }
 
 /* ── Job Card ── */
 .ljm-job-card {
-  background: #24292e;
+  background: var(--ljm-bg-secondary);
   border-radius: 12px;
   padding: 16px;
-  border: 1px solid #444c56;
+  border: 1px solid var(--ljm-border-primary);
   cursor: pointer;
   transition: border-color 0.2s, box-shadow 0.2s;
   position: relative;
 }
 .ljm-job-card:hover {
-  border-color: #6b7280;
+  border-color: var(--ljm-text-muted);
 }
 .ljm-job-card.ljm-card-active {
-  border-color: #0a66c2;
+  border-color: var(--ljm-brand);
   box-shadow: 0 0 0 1px rgba(10, 102, 194, 0.2), 0 4px 12px rgba(0,0,0,0.3);
 }
 
@@ -561,14 +580,14 @@ body.ljm-fs-active {
   width: 40px;
   height: 40px;
   border-radius: 6px;
-  background: #1c2128;
-  border: 1px solid #444c56;
+  background: var(--ljm-bg-input);
+  border: 1px solid var(--ljm-border-primary);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 16px;
   font-weight: 700;
-  color: #9ca3af;
+  color: var(--ljm-text-secondary);
   flex-shrink: 0;
 }
 
@@ -587,14 +606,14 @@ body.ljm-fs-active {
 .ljm-job-title {
   font-size: 14px;
   font-weight: 700;
-  color: #fff;
+  color: var(--ljm-text-primary);
   line-height: 1.3;
   margin-bottom: 2px;
 }
 
 .ljm-job-company {
   font-size: 11px;
-  color: #9ca3af;
+  color: var(--ljm-text-secondary);
 }
 
 .ljm-job-tags {
@@ -629,7 +648,7 @@ body.ljm-fs-active {
 
 .ljm-job-divider {
   border: none;
-  border-top: 1px solid #444c56;
+  border-top: 1px solid var(--ljm-border-primary);
   margin-top: 12px;
   padding-top: 10px;
   display: flex;
@@ -639,7 +658,7 @@ body.ljm-fs-active {
 
 .ljm-job-commute-label {
   font-size: 9px;
-  color: #9ca3af;
+  color: var(--ljm-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -652,12 +671,12 @@ body.ljm-fs-active {
 .ljm-commute-short { color: #10b981; }
 .ljm-commute-medium { color: #f59e0b; }
 .ljm-commute-long { color: #ef4444; }
-.ljm-commute-na { color: #6b7280; }
+.ljm-commute-na { color: var(--ljm-text-muted); }
 
 .ljm-job-apply {
   background: transparent;
-  border: 1px solid #0a66c2;
-  color: #0a66c2;
+  border: 1px solid var(--ljm-brand);
+  color: var(--ljm-brand);
   font-size: 11px;
   font-weight: 600;
   padding: 5px 16px;
@@ -671,11 +690,11 @@ body.ljm-fs-active {
 
 /* ── Popup ── */
 .leaflet-popup-content-wrapper {
-  background: #1f2937 !important;
-  color: #e1e4e8 !important;
+  background: var(--ljm-popup-bg) !important;
+  color: var(--ljm-text-primary) !important;
   border-radius: 8px !important;
   box-shadow: 0 10px 25px rgba(0,0,0,0.4) !important;
-  border: 1px solid #374151 !important;
+  border: 1px solid var(--ljm-popup-border) !important;
   padding: 0 !important;
 }
 .leaflet-popup-content {
@@ -683,17 +702,17 @@ body.ljm-fs-active {
   line-height: 1.4 !important;
 }
 .leaflet-popup-tip {
-  background: #1f2937 !important;
-  border: 1px solid #374151 !important;
+  background: var(--ljm-popup-bg) !important;
+  border: 1px solid var(--ljm-popup-border) !important;
   box-shadow: none !important;
 }
 .leaflet-popup-close-button {
-  color: #6b7280 !important;
+  color: var(--ljm-text-muted) !important;
   font-size: 18px !important;
   padding: 4px 8px !important;
 }
 .leaflet-popup-close-button:hover {
-  color: #fff !important;
+  color: var(--ljm-text-primary) !important;
 }
 .ljm-popup .leaflet-popup-close-button {
   top: 4px !important;
@@ -723,13 +742,13 @@ body.ljm-fs-active {
 .ljm-popup-title {
   font-size: 13px;
   font-weight: 700;
-  color: #fff;
+  color: var(--ljm-text-primary);
   line-height: 1.3;
 }
 .ljm-popup-company {
   font-size: 11px;
   font-weight: 500;
-  color: #0a66c2;
+  color: var(--ljm-brand);
   margin-top: 2px;
 }
 .ljm-popup-wt-badge {
@@ -764,12 +783,12 @@ body.ljm-fs-active {
   align-items: flex-start;
   gap: 6px;
   font-size: 11px;
-  color: #9ca3af;
+  color: var(--ljm-text-secondary);
   margin-bottom: 10px;
   line-height: 1.4;
 }
 .ljm-popup-addr-icon {
-  color: #6b7280;
+  color: var(--ljm-text-muted);
   flex-shrink: 0;
   font-size: 13px;
 }
@@ -808,18 +827,18 @@ body.ljm-fs-active {
   gap: 4px;
 }
 .ljm-popup-btn-primary {
-  background: #0a66c2;
+  background: var(--ljm-brand);
   color: #fff !important;
 }
 .ljm-popup-btn-primary:hover {
-  background: #0855a1;
+  background: var(--ljm-brand-hover);
 }
 .ljm-popup-btn-secondary {
-  background: #374151;
+  background: var(--ljm-popup-border);
   color: #fff !important;
 }
 .ljm-popup-btn-secondary:hover {
-  background: #4b5563;
+  background: var(--ljm-text-muted);
 }
 
 /* ── My Location ── */
@@ -847,13 +866,13 @@ body.ljm-fs-active {
 }
 .leaflet-control-attribution {
   background: rgba(13,17,23,0.7) !important;
-  color: #6b7280 !important;
+  color: var(--ljm-text-muted) !important;
   font-size: 9px !important;
   padding: 2px 6px !important;
   backdrop-filter: blur(4px);
 }
 .leaflet-control-attribution a {
-  color: #0a66c2 !important;
+  color: var(--ljm-brand) !important;
 }
 
 /* ── Scrollbar ── */
@@ -864,11 +883,11 @@ body.ljm-fs-active {
   background: transparent;
 }
 #ljm-panel ::-webkit-scrollbar-thumb {
-  background: #4b5563;
+  background: var(--ljm-text-muted);
   border-radius: 3px;
 }
 #ljm-panel ::-webkit-scrollbar-thumb:hover {
-  background: #6b7280;
+  background: var(--ljm-text-secondary);
 }
 
 /* ── Filter Bar ── */
@@ -877,8 +896,8 @@ body.ljm-fs-active {
   align-items: center;
   justify-content: space-between;
   padding: 10px 16px;
-  background: #24292e;
-  border-bottom: 1px solid #444c56;
+  background: var(--ljm-bg-secondary);
+  border-bottom: 1px solid var(--ljm-border-primary);
   flex-shrink: 0;
   gap: 12px;
   flex-wrap: wrap;
@@ -891,10 +910,10 @@ body.ljm-fs-active {
 }
 .ljm-search-input {
   width: 100%;
-  background: #1c2128;
-  border: 1px solid #374151;
+  background: var(--ljm-bg-input);
+  border: 1px solid var(--ljm-popup-border);
   border-radius: 8px;
-  color: #e1e4e8;
+  color: var(--ljm-text-primary);
   font-size: 12px;
   padding: 7px 12px;
   outline: none;
@@ -903,10 +922,10 @@ body.ljm-fs-active {
   box-sizing: border-box;
 }
 .ljm-search-input::placeholder {
-  color: #6b7280;
+  color: var(--ljm-text-muted);
 }
 .ljm-search-input:focus {
-  border-color: #0a66c2;
+  border-color: var(--ljm-brand);
 }
 
 .ljm-filter-group {
@@ -922,9 +941,9 @@ body.ljm-fs-active {
   padding: 4px 10px;
   font-size: 11px;
   font-weight: 500;
-  color: #6b7280;
-  background: #1c2128;
-  border: 1px solid #374151;
+  color: var(--ljm-text-muted);
+  background: var(--ljm-bg-input);
+  border: 1px solid var(--ljm-popup-border);
   border-radius: 14px;
   cursor: pointer;
   transition: color 0.15s, background 0.15s, border-color 0.15s;
@@ -932,13 +951,13 @@ body.ljm-fs-active {
   font-family: inherit;
 }
 .ljm-filter-chip:hover {
-  color: #e1e4e8;
-  border-color: #4b5563;
+  color: var(--ljm-text-primary);
+  border-color: var(--ljm-text-muted);
 }
 .ljm-filter-chip.ljm-filter-active {
-  color: #e1e4e8;
+  color: var(--ljm-text-primary);
   background: #30363d;
-  border-color: #6b7280;
+  border-color: var(--ljm-text-muted);
 }
 
 .ljm-filter-dot {
@@ -950,11 +969,11 @@ body.ljm-fs-active {
 
 .ljm-chip-count {
   font-size: 10px;
-  color: #6b7280;
+  color: var(--ljm-text-muted);
   margin-left: 2px;
 }
 .ljm-filter-chip.ljm-filter-active .ljm-chip-count {
-  color: #9ca3af;
+  color: var(--ljm-text-secondary);
 }
 
 /* Sort controls */
@@ -967,15 +986,15 @@ body.ljm-fs-active {
 
 .ljm-sort-label {
   font-size: 11px;
-  color: #6b7280;
+  color: var(--ljm-text-muted);
   white-space: nowrap;
 }
 
 .ljm-sort-select {
-  background: #1c2128;
-  border: 1px solid #374151;
+  background: var(--ljm-bg-input);
+  border: 1px solid var(--ljm-popup-border);
   border-radius: 6px;
-  color: #e1e4e8;
+  color: var(--ljm-text-primary);
   font-size: 11px;
   padding: 4px 8px;
   cursor: pointer;
@@ -985,11 +1004,11 @@ body.ljm-fs-active {
 }
 .ljm-sort-select:hover,
 .ljm-sort-select:focus {
-  border-color: #6b7280;
+  border-color: var(--ljm-text-muted);
 }
 .ljm-sort-select option {
-  background: #1c2128;
-  color: #e1e4e8;
+  background: var(--ljm-bg-input);
+  color: var(--ljm-text-primary);
 }
 
 /* ── Cluster Icons ── */
@@ -1038,7 +1057,7 @@ body.ljm-fs-active {
 /* ── Location Tag ── */
 .ljm-tag-location {
   background: rgba(107, 114, 128, 0.1);
-  color: #9ca3af;
+  color: var(--ljm-text-secondary);
   border-color: rgba(107, 114, 128, 0.2);
 }
 
@@ -1052,19 +1071,19 @@ body.ljm-fs-active {
 /* ── Popup Time ── */
 .ljm-popup-time {
   font-size: 10px;
-  color: #9ca3af;
+  color: var(--ljm-text-secondary);
   margin-bottom: 8px;
 }
 
 /* ── Markercluster Overrides (dark theme spider legs) ── */
 .leaflet-cluster-spider-leg {
-  stroke: #6b7280;
+  stroke: var(--ljm-text-muted);
   stroke-opacity: 0.6;
 }
 
 /* ── Clear Location Link ── */
 .ljm-clear-loc {
-  color: #ef4444;
+  color: var(--ljm-danger);
   font-size: 11px;
   text-decoration: none;
   cursor: pointer;
@@ -1088,7 +1107,7 @@ body.ljm-fs-active {
   align-items: center;
   justify-content: center;
   height: 120px;
-  color: #6b7280;
+  color: var(--ljm-text-muted);
   font-size: 13px;
   text-align: center;
 }

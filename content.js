@@ -9,6 +9,7 @@
   var MY_LOC_KEY = "ljm_my_location";
   var ALL_JOBS_KEY = "ljm_all_jobs";
   var COMPANY_NAMES_KEY = "ljm_company_names";
+  var THEME_KEY = "ljm_theme";
   var MAPBOX_TOKEN = "";
 
   var WORKPLACE_ONSITE = 1;
@@ -90,7 +91,9 @@
       posted: "Posted",
       sortDate: "Date",
       tokenRequired: "Mapbox token required. Please set your token in extension settings.",
-      openSettings: "Open Settings"
+      openSettings: "Open Settings",
+      darkMode: "Dark mode",
+      lightMode: "Light mode"
     },
     tr: {
       openJobMap: "Haritayi Ac",
@@ -154,7 +157,9 @@
       posted: "Yayinlandi",
       sortDate: "Tarih",
       tokenRequired: "Mapbox token gerekli. Lutfen eklenti ayarlarindan token'inizi ayarlayin.",
-      openSettings: "Ayarlari Ac"
+      openSettings: "Ayarlari Ac",
+      darkMode: "Karanlik mod",
+      lightMode: "Aydinlik mod"
     }
   };
 
@@ -197,6 +202,8 @@
   var isSyncing = false;
   var pendingFocusJobId = null;
   var mapInitialized = false;
+  var currentTheme = "dark";
+  var tileLayer = null;
 
   var allJobsById = {};
   var companyNames = {};
@@ -770,7 +777,7 @@
 
   function initMap(container) {
     map = L.map(container, { center: [30, 0], zoom: 2, zoomControl: false });
-    L.tileLayer("https://api.mapbox.com/styles/v1/mapbox/dark-v11/tiles/{z}/{x}/{y}?access_token=" + MAPBOX_TOKEN, {
+    tileLayer = L.tileLayer("https://api.mapbox.com/styles/v1/mapbox/" + (currentTheme === "light" ? "light-v11" : "dark-v11") + "/tiles/{z}/{x}/{y}?access_token=" + MAPBOX_TOKEN, {
       tileSize: 512, zoomOffset: -1, maxZoom: 18, attribution: "&copy; Mapbox"
     }).addTo(map);
 
@@ -1503,6 +1510,19 @@
     });
     actions.appendChild(clearBtn);
 
+    var themeBtn = document.createElement("button");
+    themeBtn.id = "ljm-theme-btn";
+    themeBtn.className = "ljm-header-btn";
+    updateThemeBtnIcon(themeBtn, currentTheme);
+    themeBtn.addEventListener("click", function () {
+      var newTheme = currentTheme === "dark" ? "light" : "dark";
+      applyTheme(newTheme);
+      if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.sync) {
+        chrome.storage.sync.set({ ljm_theme: newTheme });
+      }
+    });
+    actions.appendChild(themeBtn);
+
     var fsBtn = document.createElement("button");
     fsBtn.id = "ljm-fs-btn";
     fsBtn.className = "ljm-header-btn";
@@ -1638,6 +1658,55 @@
         fabBadge.classList.remove("ljm-fab-badge-visible");
       }
     }
+  }
+
+  function applyTheme(theme) {
+    currentTheme = theme;
+    if (panelEl) panelEl.setAttribute("data-ljm-theme", theme);
+    document.body.setAttribute("data-ljm-theme", theme);
+    if (map && tileLayer) {
+      var style = theme === "light" ? "light-v11" : "dark-v11";
+      tileLayer.setUrl("https://api.mapbox.com/styles/v1/mapbox/" + style + "/tiles/{z}/{x}/{y}?access_token=" + MAPBOX_TOKEN);
+    }
+    var themeBtn = document.getElementById("ljm-theme-btn");
+    if (themeBtn) {
+      updateThemeBtnIcon(themeBtn, theme);
+    }
+  }
+
+  function updateThemeBtnIcon(btn, theme) {
+    while (btn.firstChild) btn.removeChild(btn.firstChild);
+    var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("width", "16");
+    svg.setAttribute("height", "16");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("fill", "none");
+    svg.setAttribute("stroke", "currentColor");
+    svg.setAttribute("stroke-width", "2");
+    svg.setAttribute("stroke-linecap", "round");
+    svg.setAttribute("stroke-linejoin", "round");
+    if (theme === "dark") {
+      var circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      circle.setAttribute("cx", "12");
+      circle.setAttribute("cy", "12");
+      circle.setAttribute("r", "5");
+      svg.appendChild(circle);
+      var rays = [[12,1,12,3],[12,21,12,23],[4.22,4.22,5.64,5.64],[18.36,18.36,19.78,19.78],[1,12,3,12],[21,12,23,12],[4.22,19.78,5.64,18.36],[18.36,5.64,19.78,4.22]];
+      rays.forEach(function (r) {
+        var line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", String(r[0]));
+        line.setAttribute("y1", String(r[1]));
+        line.setAttribute("x2", String(r[2]));
+        line.setAttribute("y2", String(r[3]));
+        svg.appendChild(line);
+      });
+    } else {
+      var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("d", "M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z");
+      svg.appendChild(path);
+    }
+    btn.appendChild(svg);
+    btn.setAttribute("data-tooltip", theme === "dark" ? t("lightMode") : t("darkMode"));
   }
 
   // ── Main Logic ──
@@ -1837,7 +1906,10 @@
     loadAccumulatedState();
 
     if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.sync) {
-      chrome.storage.sync.get("mapboxToken", function (data) {
+      chrome.storage.sync.get(["mapboxToken", "ljm_theme"], function (data) {
+        if (data && data.ljm_theme) {
+          currentTheme = data.ljm_theme;
+        }
         if (data && data.mapboxToken) {
           MAPBOX_TOKEN = data.mapboxToken;
           boot();
@@ -1909,6 +1981,7 @@
 
   function boot() {
     createUI();
+    applyTheme(currentTheme);
     setupJobCardClickListener();
     setupKeyboardShortcuts();
     var existingCount = Object.keys(allJobsById).length;
@@ -1959,6 +2032,8 @@
       exportJobsCSV: exportJobsCSV,
       setStatus: setStatus,
       setCount: setCount,
+      applyTheme: applyTheme,
+      updateThemeBtnIcon: updateThemeBtnIcon,
       toggleFullscreen: toggleFullscreen,
       getCompanyName: getCompanyName,
       captureCompanyNamesFromDOM: captureCompanyNamesFromDOM,
@@ -2015,7 +2090,10 @@
       _getIsLoading: function () { return isLoading; },
       _getPendingScanAfterLoad: function () { return pendingScanAfterLoad; },
       _getMarkerRefs: function () { return markerRefs; },
-      _getCurrentGeoJobs: function () { return currentGeoJobs; }
+      _getCurrentGeoJobs: function () { return currentGeoJobs; },
+      _setCurrentTheme: function (th) { currentTheme = th; },
+      _getCurrentTheme: function () { return currentTheme; },
+      _setTileLayer: function (l) { tileLayer = l; }
     };
   } else {
     init();

@@ -497,8 +497,6 @@ body.ljm-fs-active {
   display: flex;
   flex-direction: column;
   gap: 12px;
-}
-.ljm-cards-list {
   scrollbar-width: thin;
   scrollbar-color: rgba(255,255,255,0.15) transparent;
 }

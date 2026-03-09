@@ -13,6 +13,7 @@ beforeEach(() => {
   ljm._setCompanyNames({});
   ljm._setCompanyCache({});
   ljm._setCurrentLocale("en");
+  ljm._setFavoritesSet({});
 });
 
 // ═══════════════════════════════════════════════════════════
@@ -702,6 +703,51 @@ describe("getFilteredJobs", () => {
   it("handles empty allJobsById", () => {
     ljm._setAllJobsById({});
     const result = ljm.getFilteredJobs();
+    expect(result).toHaveLength(0);
+  });
+
+  it("filters to favorites only when favoritesOnly is true", () => {
+    ljm._setFavoritesSet({ "1": true });
+    ljm._setAllJobsById({
+      "1": { jobId: "1", title: "A", company: "C", location: "L", workplaceType: 1 },
+      "2": { jobId: "2", title: "B", company: "C", location: "L", workplaceType: 1 }
+    });
+    ljm._setFilterState({ onSite: true, hybrid: true, remote: true, favoritesOnly: true });
+    var result = ljm.getFilteredJobs();
+    expect(result).toHaveLength(1);
+    expect(result[0].jobId).toBe("1");
+  });
+
+  it("shows all jobs when favoritesOnly is false", () => {
+    ljm._setFavoritesSet({ "1": true });
+    ljm._setAllJobsById({
+      "1": { jobId: "1", title: "A", company: "C", location: "L", workplaceType: 1 },
+      "2": { jobId: "2", title: "B", company: "C", location: "L", workplaceType: 1 }
+    });
+    ljm._setFilterState({ onSite: true, hybrid: true, remote: true, favoritesOnly: false });
+    var result = ljm.getFilteredJobs();
+    expect(result).toHaveLength(2);
+  });
+
+  it("favorites filter combines with workplace type filter", () => {
+    ljm._setFavoritesSet({ "1": true, "2": true });
+    ljm._setAllJobsById({
+      "1": { jobId: "1", title: "A", company: "C", location: "L", workplaceType: 1 },
+      "2": { jobId: "2", title: "B", company: "C", location: "L", workplaceType: 2 }
+    });
+    ljm._setFilterState({ onSite: true, hybrid: true, remote: false, favoritesOnly: true });
+    var result = ljm.getFilteredJobs();
+    expect(result).toHaveLength(1);
+    expect(result[0].jobId).toBe("1");
+  });
+
+  it("favorites filter with no favorites returns empty", () => {
+    ljm._setFavoritesSet({});
+    ljm._setAllJobsById({
+      "1": { jobId: "1", title: "A", company: "C", location: "L", workplaceType: 1 }
+    });
+    ljm._setFilterState({ onSite: true, hybrid: true, remote: true, favoritesOnly: true });
+    var result = ljm.getFilteredJobs();
     expect(result).toHaveLength(0);
   });
 });

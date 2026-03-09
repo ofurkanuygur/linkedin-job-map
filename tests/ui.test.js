@@ -883,3 +883,158 @@ describe("createCardsPanel", () => {
     expect(footer.textContent).toContain("Live");
   });
 });
+
+// ===============================================================
+// Favorites system
+// ===============================================================
+describe("favorites system", () => {
+  beforeEach(() => {
+    ljm._setFavoritesSet({});
+    ljm._setFilterState({ onSite: true, hybrid: true, remote: true, favoritesOnly: false });
+  });
+
+  it("isFavorite returns false for non-favorited job", () => {
+    expect(ljm.isFavorite("123")).toBe(false);
+  });
+
+  it("isFavorite returns true after adding to favorites", () => {
+    ljm._setFavoritesSet({ "123": true });
+    expect(ljm.isFavorite("123")).toBe(true);
+  });
+
+  it("toggleFavorite adds job to favorites", () => {
+    ljm.toggleFavorite("123");
+    expect(ljm._getFavoritesSet()["123"]).toBe(true);
+  });
+
+  it("toggleFavorite removes job from favorites", () => {
+    ljm._setFavoritesSet({ "123": true });
+    ljm.toggleFavorite("123");
+    expect(ljm._getFavoritesSet()["123"]).toBeUndefined();
+  });
+
+  it("toggleFavorite is idempotent on double toggle", () => {
+    ljm.toggleFavorite("123");
+    expect(ljm.isFavorite("123")).toBe(true);
+    ljm.toggleFavorite("123");
+    expect(ljm.isFavorite("123")).toBe(false);
+  });
+
+  it("card renders star button", () => {
+    var cardsListEl = document.createElement("div");
+    document.body.appendChild(cardsListEl);
+    ljm._setCardsListEl(cardsListEl);
+    ljm._setCardsBadgeEl(document.createElement("span"));
+    ljm._setCardsFooterTimeEl(document.createElement("span"));
+
+    ljm.renderJobCards([{
+      jobId: "123", title: "Dev", company: "Co", location: "Loc",
+      workplaceType: 1, lat: 41, lng: 29, hasPreciseAddress: true
+    }]);
+
+    var star = document.querySelector(".ljm-fav-btn");
+    expect(star).not.toBeNull();
+    expect(star.textContent).toBe("\u2606");
+  });
+
+  it("card renders filled star for favorited job", () => {
+    ljm._setFavoritesSet({ "123": true });
+    var cardsListEl = document.createElement("div");
+    document.body.appendChild(cardsListEl);
+    ljm._setCardsListEl(cardsListEl);
+    ljm._setCardsBadgeEl(document.createElement("span"));
+    ljm._setCardsFooterTimeEl(document.createElement("span"));
+
+    ljm.renderJobCards([{
+      jobId: "123", title: "Dev", company: "Co", location: "Loc",
+      workplaceType: 1, lat: 41, lng: 29, hasPreciseAddress: true
+    }]);
+
+    var star = document.querySelector(".ljm-fav-btn");
+    expect(star.classList.contains("ljm-fav-active")).toBe(true);
+    expect(star.textContent).toBe("\u2605");
+  });
+
+  it("createFilterBar includes favorites chip", () => {
+    var bar = ljm.createFilterBar();
+    var favChip = bar.querySelector('[data-filter-key="favoritesOnly"]');
+    expect(favChip).not.toBeNull();
+    expect(favChip.textContent).toContain("Favorites");
+  });
+
+  it("favorites chip has amber dot", () => {
+    var bar = ljm.createFilterBar();
+    var favChip = bar.querySelector('[data-filter-key="favoritesOnly"]');
+    var dot = favChip.querySelector(".ljm-dot-fav");
+    expect(dot).not.toBeNull();
+  });
+
+  it("buildPopup includes star in title", () => {
+    ljm._setFavoritesSet({});
+    var html = ljm.buildPopup({
+      jobId: "123", title: "Dev", company: "Co", location: "Loc",
+      workplaceType: 1, lat: 41, lng: 29, hasPreciseAddress: true
+    });
+    expect(html).toContain("ljm-popup-fav");
+    expect(html).toContain("data-ljm-fav");
+    expect(html).toContain("\u2606");
+  });
+
+  it("buildPopup shows filled star for favorited job", () => {
+    ljm._setFavoritesSet({ "123": true });
+    var html = ljm.buildPopup({
+      jobId: "123", title: "Dev", company: "Co", location: "Loc",
+      workplaceType: 1, lat: 41, lng: 29, hasPreciseAddress: true
+    });
+    expect(html).toContain("\u2605");
+  });
+});
+
+// ===============================================================
+// Theme system
+// ===============================================================
+describe("theme system", () => {
+  beforeEach(() => {
+    ljm._setCurrentTheme("dark");
+    ljm._setTileLayer(null);
+    var panel = document.createElement("div");
+    panel.id = "ljm-panel";
+    document.body.appendChild(panel);
+    ljm._setPanelEl(panel);
+  });
+
+  it("applyTheme sets data-ljm-theme attribute on panel", () => {
+    ljm.applyTheme("light");
+    var panel = document.getElementById("ljm-panel");
+    expect(panel.getAttribute("data-ljm-theme")).toBe("light");
+  });
+
+  it("applyTheme sets data-ljm-theme on body", () => {
+    ljm.applyTheme("light");
+    expect(document.body.getAttribute("data-ljm-theme")).toBe("light");
+  });
+
+  it("applyTheme updates currentTheme state", () => {
+    ljm.applyTheme("light");
+    expect(ljm._getCurrentTheme()).toBe("light");
+  });
+
+  it("applyTheme to dark sets dark attribute", () => {
+    ljm.applyTheme("dark");
+    var panel = document.getElementById("ljm-panel");
+    expect(panel.getAttribute("data-ljm-theme")).toBe("dark");
+  });
+
+  it("applyTheme toggles between dark and light", () => {
+    ljm.applyTheme("light");
+    expect(ljm._getCurrentTheme()).toBe("light");
+    ljm.applyTheme("dark");
+    expect(ljm._getCurrentTheme()).toBe("dark");
+  });
+
+  it("applyTheme handles missing panel gracefully", () => {
+    ljm._setPanelEl(null);
+    expect(() => ljm.applyTheme("light")).not.toThrow();
+    expect(ljm._getCurrentTheme()).toBe("light");
+  });
+});

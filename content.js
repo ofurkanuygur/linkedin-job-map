@@ -11,6 +11,7 @@
   var COMPANY_NAMES_KEY = "ljm_company_names";
   var THEME_KEY = "ljm_theme";
   var FAVORITES_KEY = "ljm_favorites";
+  var SHARED_JOBS_KEY = "ljm_shared_jobs";
   var MAPBOX_TOKEN = "";
 
   var WORKPLACE_ONSITE = 1;
@@ -97,7 +98,8 @@
       lightMode: "Light mode",
       favorites: "Favorites",
       addFavorite: "Add to favorites",
-      removeFavorite: "Remove from favorites"
+      removeFavorite: "Remove from favorites",
+      syncedFromTabs: "{count} new jobs synced from other tabs"
     },
     tr: {
       openJobMap: "Haritayi Ac",
@@ -166,7 +168,8 @@
       lightMode: "Aydinlik mod",
       favorites: "Favoriler",
       addFavorite: "Favorilere ekle",
-      removeFavorite: "Favorilerden cikar"
+      removeFavorite: "Favorilerden cikar",
+      syncedFromTabs: "Diger sekmelerden {count} yeni is senkronize edildi"
     }
   };
 
@@ -301,6 +304,83 @@
 
   function isFavorite(jobId) {
     return !!favoritesSet[jobId];
+  }
+
+  function saveToSharedStorage() {
+    if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+      var obj = {};
+      obj[SHARED_JOBS_KEY] = allJobsById;
+      chrome.storage.local.set(obj);
+    }
+  }
+
+  function loadFromSharedStorage(callback) {
+    if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+      chrome.storage.local.get(SHARED_JOBS_KEY, function (data) {
+        if (data && data[SHARED_JOBS_KEY]) {
+          var shared = data[SHARED_JOBS_KEY];
+          var keys = Object.keys(shared);
+          var newCount = 0;
+          for (var i = 0; i < keys.length; i++) {
+            if (!allJobsById[keys[i]]) {
+              allJobsById[keys[i]] = shared[keys[i]];
+              newCount++;
+            }
+          }
+          if (newCount > 0) {
+            saveAccumulatedState();
+          }
+        }
+        if (callback) callback();
+      });
+    } else {
+      if (callback) callback();
+    }
+  }
+
+  function setupStorageListener() {
+    if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.onChanged) {
+      chrome.storage.onChanged.addListener(function (changes, area) {
+        if (area !== "local") return;
+
+        if (changes[SHARED_JOBS_KEY] && changes[SHARED_JOBS_KEY].newValue) {
+          var shared = changes[SHARED_JOBS_KEY].newValue;
+          var keys = Object.keys(shared);
+          var newCount = 0;
+          for (var i = 0; i < keys.length; i++) {
+            if (!allJobsById[keys[i]]) {
+              allJobsById[keys[i]] = shared[keys[i]];
+              newCount++;
+            }
+          }
+          if (newCount > 0) {
+            saveAccumulatedState();
+            if (map && markersLayer) {
+              displayFilteredResults();
+              setStatus(t("syncedFromTabs", { count: newCount }));
+            } else {
+              setCount(Object.keys(allJobsById).length);
+              updateFilterChipCounts();
+            }
+          }
+        }
+
+        if (changes[FAVORITES_KEY] && changes[FAVORITES_KEY].newValue) {
+          favoritesSet = changes[FAVORITES_KEY].newValue;
+          var stars = document.querySelectorAll("[data-ljm-fav]");
+          for (var s = 0; s < stars.length; s++) {
+            var jid = stars[s].getAttribute("data-ljm-fav");
+            var fav = !!favoritesSet[jid];
+            stars[s].classList.toggle("ljm-fav-active", fav);
+            if (stars[s].tagName === "BUTTON" || stars[s].tagName === "SPAN") {
+              stars[s].textContent = fav ? "\u2605" : "\u2606";
+            }
+          }
+          updateFilterChipCounts();
+          if (filterState.favoritesOnly) displayFilteredResults();
+        }
+      });
+    }
   }
 
   function getAllJobs() {
@@ -1602,6 +1682,9 @@
       companyNames = {};
       companyCache = {};
       saveAccumulatedState();
+      if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+        chrome.storage.local.remove(SHARED_JOBS_KEY);
+      }
       if (map && markersLayer) {
         markersLayer.clearLayers();
         markerRefs = {};
@@ -1858,6 +1941,7 @@
       allJobsById[j.jobId] = j;
     });
     saveAccumulatedState();
+    saveToSharedStorage();
 
     if (map && markersLayer) {
       displayFilteredResults();
@@ -2093,15 +2177,18 @@
 
   function boot() {
     loadFavorites(function () {
-      createUI();
-      applyTheme(currentTheme);
-      setupJobCardClickListener();
-      setupKeyboardShortcuts();
-      var existingCount = Object.keys(allJobsById).length;
-      if (existingCount > 0) setCount(existingCount);
-      scanCurrentPage();
-      startUrlWatcher();
-      reattachJobListObserver();
+      loadFromSharedStorage(function () {
+        createUI();
+        applyTheme(currentTheme);
+        setupJobCardClickListener();
+        setupKeyboardShortcuts();
+        setupStorageListener();
+        var existingCount = Object.keys(allJobsById).length;
+        if (existingCount > 0) setCount(existingCount);
+        scanCurrentPage();
+        startUrlWatcher();
+        reattachJobListObserver();
+      });
     });
   }
 
@@ -2180,6 +2267,9 @@
       saveFavorites: saveFavorites,
       toggleFavorite: toggleFavorite,
       isFavorite: isFavorite,
+      saveToSharedStorage: saveToSharedStorage,
+      loadFromSharedStorage: loadFromSharedStorage,
+      setupStorageListener: setupStorageListener,
       _setFavoritesSet: function (f) { favoritesSet = f; },
       _getFavoritesSet: function () { return favoritesSet; },
       _setMyLocation: function (loc) { myLocation = loc; },

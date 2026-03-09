@@ -141,7 +141,6 @@ beforeEach(() => {
   ljm._setCurrentLocale("en");
   ljm._setMarkerRefs({});
   ljm._setCurrentGeoJobs([]);
-  ljm._setRouteLayer(null);
   ljm._setIsSyncing(false);
   ljm._setIsFullscreen(false);
   ljm._setMapInitialized(true);
@@ -434,176 +433,10 @@ describe("clearMyLocation", () => {
     ljm.clearMyLocation();
     expect(chrome.storage.local.remove).toHaveBeenCalledWith("ljm_my_location");
   });
-
-  it("clears any existing route", () => {
-    // Set a route layer first
-    const routeLayer = { id: "mock-route" };
-    ljm._setRouteLayer(routeLayer);
-
-    ljm.clearMyLocation();
-
-    // clearRoute should have been called, which calls map.removeLayer
-    expect(mockMap.removeLayer).toHaveBeenCalledWith(routeLayer);
-  });
 });
 
 // ═══════════════════════════════════════════════════════════════
-//  4. showRoute(toLat, toLng)
-// ═══════════════════════════════════════════════════════════════
-
-describe("showRoute", () => {
-  let mockMap;
-  let statusEl;
-
-  beforeEach(() => {
-    mockMap = createMockMap();
-    ljm._setMap(mockMap);
-    ljm._setMarkersLayer(createMockMarkersLayer());
-    ljm._setMyLocationLayer(createMockLayerGroup());
-    ljm._setCurrentGeoJobs([]);
-    ljm._setMarkerRefs({});
-    ljm._setRouteLayer(null);
-
-    statusEl = document.createElement("div");
-    statusEl.id = "ljm-status";
-    document.body.appendChild(statusEl);
-
-    fetch.mockReset();
-  });
-
-  it("does nothing without myLocation", () => {
-    ljm._setMyLocation(null);
-    ljm.showRoute(39.9, 32.8);
-    expect(fetch).not.toHaveBeenCalled();
-  });
-
-  it("fetches route from OSRM when myLocation is set", async () => {
-    ljm._setMyLocation({ lat: 41.0, lng: 29.0 });
-
-    const mockGeometry = { type: "LineString", coordinates: [[29, 41], [32.8, 39.9]] };
-    mockFetchResponse({
-      routes: [{
-        geometry: mockGeometry,
-        distance: 35200,
-        duration: 1920,
-      }],
-    });
-
-    ljm.showRoute(39.9, 32.8);
-
-    // Wait for fetch to resolve
-    await vi.waitFor(() => {
-      expect(fetch).toHaveBeenCalledTimes(1);
-    });
-
-    expect(fetch.mock.calls[0][0]).toContain("router.project-osrm.org/route/v1/driving/");
-  });
-
-  it("shows calculating status before route returns", () => {
-    ljm._setMyLocation({ lat: 41.0, lng: 29.0 });
-
-    // Use a pending promise so it stays in "calculating" state
-    global.fetch.mockReturnValueOnce(new Promise(() => {}));
-
-    ljm.showRoute(39.9, 32.8);
-
-    expect(statusEl.textContent).toContain("Calculating route");
-  });
-
-  it("creates a geoJSON layer when route is returned", async () => {
-    ljm._setMyLocation({ lat: 41.0, lng: 29.0 });
-
-    const mockGeometry = { type: "LineString", coordinates: [[29, 41], [32.8, 39.9]] };
-    mockFetchResponse({
-      routes: [{
-        geometry: mockGeometry,
-        distance: 35200,
-        duration: 1920,
-      }],
-    });
-
-    ljm.showRoute(39.9, 32.8);
-
-    await vi.waitFor(() => {
-      expect(L.geoJSON).toHaveBeenCalled();
-    });
-
-    expect(L.geoJSON.mock.calls[0][0]).toEqual(mockGeometry);
-  });
-
-  it("shows error status when no route is available", async () => {
-    ljm._setMyLocation({ lat: 41.0, lng: 29.0 });
-
-    mockFetchResponse({ routes: [] });
-
-    ljm.showRoute(39.9, 32.8);
-
-    await vi.waitFor(() => {
-      expect(statusEl.textContent).toContain("Route not available");
-    });
-  });
-
-  it("displays route info on success", async () => {
-    ljm._setMyLocation({ lat: 41.0, lng: 29.0 });
-
-    mockFetchResponse({
-      routes: [{
-        geometry: { type: "LineString", coordinates: [] },
-        distance: 35200,
-        duration: 1920,
-      }],
-    });
-
-    ljm.showRoute(39.9, 32.8);
-
-    await vi.waitFor(() => {
-      expect(statusEl.textContent).toContain("Route:");
-      expect(statusEl.textContent).toContain("35.2");
-      expect(statusEl.textContent).toContain("32");
-    });
-  });
-});
-
-// ═══════════════════════════════════════════════════════════════
-//  5. clearRoute()
-// ═══════════════════════════════════════════════════════════════
-
-describe("clearRoute", () => {
-  let mockMap;
-
-  beforeEach(() => {
-    mockMap = createMockMap();
-    ljm._setMap(mockMap);
-  });
-
-  it("removes route layer from map when routeLayer exists", () => {
-    const routeLayer = { id: "mock-route-layer" };
-    ljm._setRouteLayer(routeLayer);
-
-    ljm.clearRoute();
-
-    expect(mockMap.removeLayer).toHaveBeenCalledWith(routeLayer);
-  });
-
-  it("does nothing if no route layer exists", () => {
-    ljm._setRouteLayer(null);
-    ljm.clearRoute();
-    expect(mockMap.removeLayer).not.toHaveBeenCalled();
-  });
-
-  it("sets routeLayer to null after clearing", () => {
-    ljm._setRouteLayer({ id: "some-layer" });
-    ljm.clearRoute();
-
-    // After clearRoute, calling it again should NOT call removeLayer
-    mockMap.removeLayer.mockClear();
-    ljm.clearRoute();
-    expect(mockMap.removeLayer).not.toHaveBeenCalled();
-  });
-});
-
-// ═══════════════════════════════════════════════════════════════
-//  6. highlightMarkerRing(latlng)
+//  4. highlightMarkerRing(latlng)
 // ═══════════════════════════════════════════════════════════════
 
 describe("highlightMarkerRing", () => {
@@ -687,7 +520,7 @@ describe("highlightMarkerRing", () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-//  7. focusJobOnMap(jobId)
+//  5. focusJobOnMap(jobId)
 // ═══════════════════════════════════════════════════════════════
 
 describe("focusJobOnMap", () => {
@@ -812,7 +645,7 @@ describe("focusJobOnMap", () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-//  8. refreshPopups(geoJobs)
+//  6. refreshPopups(geoJobs)
 // ═══════════════════════════════════════════════════════════════
 
 describe("refreshPopups", () => {
@@ -882,7 +715,7 @@ describe("refreshPopups", () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-//  9. displayFilteredResults()
+//  7. displayFilteredResults()
 // ═══════════════════════════════════════════════════════════════
 
 describe("displayFilteredResults", () => {

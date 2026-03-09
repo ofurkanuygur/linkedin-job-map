@@ -32,7 +32,6 @@
       openJobMap: "Open Job Map",
       linkedInJobMap: "LinkedIn Job Map",
       rescanJobs: "Rescan jobs",
-      clearJobs: "Clear jobs",
       clearAllCache: "Clear all cache",
       fullscreen: "Fullscreen",
       exitFullscreen: "Exit fullscreen",
@@ -41,7 +40,6 @@
       onSite: "On-site",
       remote: "Remote",
       hybrid: "Hybrid",
-      unknown: "Unknown",
       myLocation: "My Location",
       remove: "Remove",
       myLocationGPS: "My location (GPS)",
@@ -59,9 +57,6 @@
       viewJob: "View Job",
       linkedInBtn: "LinkedIn",
       mapsBtn: "Maps",
-      calculatingRoute: "Calculating route...",
-      routeNotAvailable: "Route not available. Try Google Maps link.",
-      routeInfo: "Route: {distance} km, ~{duration} min",
       noNewJobs: "No new jobs on this page. Total: {total}",
       newJobsFetching: "{count} new jobs. Fetching...",
       jobsProgress: "Jobs: {done}/{total}",
@@ -75,7 +70,6 @@
       pageChanged: "Page changed. Scanning new jobs...",
       newJobsDetected: "New jobs detected...",
       loadingJobData: "Loading job data...",
-      allJobsCleared: "All jobs cleared. Scanning current page...",
       allCacheCleared: "All cache cleared. Re-scanning...",
       geoNotSupported: "Geolocation not supported by this browser.",
       gettingGPS: "Getting GPS location...",
@@ -85,8 +79,6 @@
       sortDistance: "Distance",
       sortCompany: "Company",
       sortType: "Type",
-      filterAll: "All",
-      showingOf: "{shown} of {total}",
       noJobsMatch: "No jobs match filters.",
       searchPlaceholder: "Search jobs...",
       exportCSV: "Export CSV",
@@ -104,7 +96,6 @@
       openJobMap: "Haritayi Ac",
       linkedInJobMap: "LinkedIn Is Haritasi",
       rescanJobs: "Tekrar tara",
-      clearJobs: "Isleri temizle",
       clearAllCache: "Onbellegi temizle",
       fullscreen: "Tam ekran",
       exitFullscreen: "Tam ekrandan cik",
@@ -113,7 +104,6 @@
       onSite: "Yerinde",
       remote: "Uzaktan",
       hybrid: "Hibrit",
-      unknown: "Bilinmiyor",
       myLocation: "Benim Konumum",
       remove: "Kaldir",
       myLocationGPS: "Konumum (GPS)",
@@ -131,9 +121,6 @@
       viewJob: "Ilana Git",
       linkedInBtn: "LinkedIn",
       mapsBtn: "Haritalar",
-      calculatingRoute: "Rota hesaplaniyor...",
-      routeNotAvailable: "Rota mevcut degil. Google Haritalar linkini deneyin.",
-      routeInfo: "Rota: {distance} km, ~{duration} dk",
       noNewJobs: "Bu sayfada yeni is yok. Toplam: {total}",
       newJobsFetching: "{count} yeni is. Aliniyor...",
       jobsProgress: "Isler: {done}/{total}",
@@ -147,7 +134,6 @@
       pageChanged: "Sayfa degisti. Yeni isler taraniyor...",
       newJobsDetected: "Yeni isler algilandi...",
       loadingJobData: "Is verileri yukleniyor...",
-      allJobsCleared: "Tum isler temizlendi. Sayfa taraniyor...",
       allCacheCleared: "Onbellek temizlendi. Tekrar taraniyor...",
       geoNotSupported: "Bu tarayici konum desteklemiyor.",
       gettingGPS: "GPS konumu aliniyor...",
@@ -157,8 +143,6 @@
       sortDistance: "Mesafe",
       sortCompany: "Sirket",
       sortType: "Tur",
-      filterAll: "Hepsi",
-      showingOf: "{total} icinden {shown}",
       noJobsMatch: "Filtreye uyan is yok.",
       searchPlaceholder: "Is ara...",
       exportCSV: "CSV Indir",
@@ -202,7 +186,6 @@
   var map = null;
   var markersLayer = null;
   var myLocationLayer = null;
-  var routeLayer = null;
   var myLocationMarker = null;
   var myLocation = null;
   var currentGeoJobs = [];
@@ -664,51 +647,6 @@
     });
   }
 
-  // ── Routing (OSRM) ──
-
-  function fetchRoute(fromLat, fromLng, toLat, toLng) {
-    var url = "https://router.project-osrm.org/route/v1/driving/" +
-      fromLng + "," + fromLat + ";" + toLng + "," + toLat +
-      "?overview=full&geometries=geojson";
-    return fetch(url, {
-      signal: scanAbortController ? scanAbortController.signal : undefined
-    })
-      .then(function (res) { return res.ok ? res.json() : null; })
-      .then(function (data) {
-        if (data && data.routes && data.routes.length > 0) {
-          var r = data.routes[0];
-          return {
-            geometry: r.geometry,
-            distanceKm: (r.distance / 1000).toFixed(1),
-            durationMin: Math.round(r.duration / 60)
-          };
-        }
-        return null;
-      })
-      .catch(function (err) {
-        if (err && err.name === "AbortError") return null;
-        return null;
-      });
-  }
-
-  function showRoute(toLat, toLng) {
-    if (!myLocation) return;
-    clearRoute();
-    setStatus(t("calculatingRoute"), true);
-    fetchRoute(myLocation.lat, myLocation.lng, toLat, toLng).then(function (route) {
-      if (!route) { setStatus(t("routeNotAvailable")); return; }
-      routeLayer = L.geoJSON(route.geometry, {
-        style: { color: "#0a66c2", weight: 5, opacity: 0.8 }
-      }).addTo(map);
-      map.fitBounds(routeLayer.getBounds(), { padding: [50, 50] });
-      setStatus(t("routeInfo", { distance: route.distanceKm, duration: route.durationMin }));
-    }).catch(function () { setStatus(t("routeNotAvailable")); });
-  }
-
-  function clearRoute() {
-    if (routeLayer) { map.removeLayer(routeLayer); routeLayer = null; }
-  }
-
   // ── Popup builder ──
 
   function getWtClass(wt) {
@@ -920,7 +858,6 @@
     if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
       chrome.storage.local.remove(MY_LOC_KEY);
     }
-    clearRoute();
     refreshPopups();
   }
 
@@ -1555,7 +1492,6 @@
       saveAccumulatedState();
       if (map && markersLayer) {
         markersLayer.clearLayers();
-        clearRoute();
         markerRefs = {};
         currentGeoJobs = [];
       }
@@ -2005,7 +1941,6 @@
       processInParallel: processInParallel,
       getProximityHint: getProximityHint,
       geocodeLocation: geocodeLocation,
-      fetchRoute: fetchRoute,
       fetchJobWithCompany: fetchJobWithCompany,
       fetchCompanyLocations: fetchCompanyLocations,
       geocodeJobs: geocodeJobs,
@@ -2032,8 +1967,6 @@
       mergeAndDisplay: mergeAndDisplay,
       loadPageJobs: loadPageJobs,
       scanCurrentPage: scanCurrentPage,
-      showRoute: showRoute,
-      clearRoute: clearRoute,
       refreshPopups: refreshPopups,
       setMyLocation: setMyLocation,
       clearMyLocation: clearMyLocation,
@@ -2073,7 +2006,6 @@
       _setPanelEl: function (el) { panelEl = el; },
       _setToggleBtnEl: function (el) { toggleBtnEl = el; },
       _setMyLocationLayer: function (l) { myLocationLayer = l; },
-      _setRouteLayer: function (l) { routeLayer = l; },
       _setMarkerRefs: function (r) { markerRefs = r; },
       _setCurrentGeoJobs: function (j) { currentGeoJobs = j; },
       _setIsSyncing: function (v) { isSyncing = v; },

@@ -215,60 +215,7 @@ describe("geocodeLocation", () => {
 });
 
 // ═══════════════════════════════════════════════════════════
-// 3. fetchRoute
-// ═══════════════════════════════════════════════════════════
-
-describe("fetchRoute", () => {
-  it("constructs correct OSRM URL", async () => {
-    mockFetchResponse({
-      routes: [{
-        geometry: { type: "LineString", coordinates: [] },
-        distance: 10000,
-        duration: 600,
-      }],
-    });
-
-    await ljm.fetchRoute(41.0, 29.0, 39.9, 32.8);
-    expect(fetch.mock.calls[0][0]).toBe(
-      "https://router.project-osrm.org/route/v1/driving/29,41;32.8,39.9?overview=full&geometries=geojson"
-    );
-  });
-
-  it("returns route geometry, distanceKm, durationMin", async () => {
-    const mockGeometry = { type: "LineString", coordinates: [[29, 41], [32.8, 39.9]] };
-    mockFetchResponse({
-      routes: [{
-        geometry: mockGeometry,
-        distance: 35200,    // meters
-        duration: 1920,     // seconds
-      }],
-    });
-
-    const result = await ljm.fetchRoute(41.0, 29.0, 39.9, 32.8);
-    expect(result).toEqual({
-      geometry: mockGeometry,
-      distanceKm: "35.2",
-      durationMin: 32,
-    });
-  });
-
-  it("returns null for no routes", async () => {
-    mockFetchResponse({ routes: [] });
-
-    const result = await ljm.fetchRoute(41.0, 29.0, 39.9, 32.8);
-    expect(result).toBeNull();
-  });
-
-  it("returns null on network error", async () => {
-    mockFetchError();
-
-    const result = await ljm.fetchRoute(41.0, 29.0, 39.9, 32.8);
-    expect(result).toBeNull();
-  });
-});
-
-// ═══════════════════════════════════════════════════════════
-// 4. fetchJobWithCompany
+// 3. fetchJobWithCompany
 // ═══════════════════════════════════════════════════════════
 
 describe("fetchJobWithCompany", () => {
@@ -354,7 +301,7 @@ describe("fetchJobWithCompany", () => {
 });
 
 // ═══════════════════════════════════════════════════════════
-// 5. fetchCompanyLocations
+// 4. fetchCompanyLocations
 // ═══════════════════════════════════════════════════════════
 
 describe("fetchCompanyLocations", () => {
@@ -461,7 +408,7 @@ describe("fetchCompanyLocations", () => {
 });
 
 // ═══════════════════════════════════════════════════════════
-// 6. enrichWithCompanyAddress
+// 5. enrichWithCompanyAddress
 // ═══════════════════════════════════════════════════════════
 
 describe("enrichWithCompanyAddress", () => {
@@ -600,7 +547,7 @@ describe("enrichWithCompanyAddress", () => {
 });
 
 // ═══════════════════════════════════════════════════════════
-// 7. geocodeJobs
+// 6. geocodeJobs
 // ═══════════════════════════════════════════════════════════
 
 describe("geocodeJobs", () => {

@@ -6,7 +6,6 @@
   "permissions": ["storage"],
   "host_permissions": [
     "https://www.linkedin.com/voyager/api/*",
-    "https://router.project-osrm.org/*",
     "https://api.mapbox.com/*"
   ],
   "content_scripts": [

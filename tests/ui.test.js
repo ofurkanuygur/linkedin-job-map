@@ -33,7 +33,7 @@ const ljm = require("../content.js");
 beforeEach(() => {
   ljm._setMyLocation(null);
   ljm._setAllJobsById({});
-  ljm._setFilterState({ onSite: true, hybrid: true, remote: true });
+  ljm._setFilterState({ onSite: true, hybrid: true, remote: true, favoritesOnly: false });
   ljm._setSortState("distance");
   ljm._setSearchQuery("");
   ljm._setCompanyNames({});
@@ -363,7 +363,7 @@ describe("exportJobsCSV", () => {
   beforeEach(() => {
     capturedBlobContent = null;
     ljm._setMyLocation(null);
-    ljm._setFilterState({ onSite: true, hybrid: true, remote: true });
+    ljm._setFilterState({ onSite: true, hybrid: true, remote: true, favoritesOnly: false });
     ljm._setSortState("distance");
     ljm._setSearchQuery("");
 
@@ -714,10 +714,10 @@ describe("createFilterBar", () => {
     expect(input.placeholder).toBe("Search jobs...");
   });
 
-  it("contains 3 filter chips (onSite, hybrid, remote)", () => {
+  it("contains 4 filter chips (onSite, hybrid, remote, favorites)", () => {
     var bar = ljm.createFilterBar();
     var chips = bar.querySelectorAll(".ljm-filter-chip");
-    expect(chips).toHaveLength(3);
+    expect(chips).toHaveLength(4);
   });
 
   it("filter chips have data-filter-key attributes", () => {
@@ -756,13 +756,18 @@ describe("createFilterBar", () => {
     expect(texts).toContain("Date");
   });
 
-  it("filter chips have active class when filter state is true", () => {
-    ljm._setFilterState({ onSite: true, hybrid: true, remote: true });
+  it("workplace filter chips have active class when filter state is true", () => {
+    ljm._setFilterState({ onSite: true, hybrid: true, remote: true, favoritesOnly: false });
     var bar = ljm.createFilterBar();
-    var chips = bar.querySelectorAll(".ljm-filter-chip");
-    chips.forEach(function (chip) {
-      expect(chip.classList.contains("ljm-filter-active")).toBe(true);
-    });
+    var onSiteChip = bar.querySelector('[data-filter-key="onSite"]');
+    var hybridChip = bar.querySelector('[data-filter-key="hybrid"]');
+    var remoteChip = bar.querySelector('[data-filter-key="remote"]');
+    expect(onSiteChip.classList.contains("ljm-filter-active")).toBe(true);
+    expect(hybridChip.classList.contains("ljm-filter-active")).toBe(true);
+    expect(remoteChip.classList.contains("ljm-filter-active")).toBe(true);
+    // Favorites chip should not be active when favoritesOnly is false
+    var favChip = bar.querySelector('[data-filter-key="favoritesOnly"]');
+    expect(favChip.classList.contains("ljm-filter-active")).toBe(false);
   });
 
   it("contains sort label with Sort: text", () => {

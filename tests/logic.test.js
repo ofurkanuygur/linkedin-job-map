@@ -7,7 +7,7 @@ const ljm = require("../content.js");
 beforeEach(() => {
   ljm._setMyLocation(null);
   ljm._setAllJobsById({});
-  ljm._setFilterState({ onSite: true, hybrid: true, remote: true });
+  ljm._setFilterState({ onSite: true, hybrid: true, remote: true, favoritesOnly: false });
   ljm._setSortState("distance");
   ljm._setSearchQuery("");
   ljm._setCompanyNames({});
@@ -564,7 +564,7 @@ describe("getFilteredJobs", () => {
 
   beforeEach(() => {
     ljm._setAllJobsById(JSON.parse(JSON.stringify(sampleJobs)));
-    ljm._setFilterState({ onSite: true, hybrid: true, remote: true });
+    ljm._setFilterState({ onSite: true, hybrid: true, remote: true, favoritesOnly: false });
     ljm._setSortState("distance");
     ljm._setSearchQuery("");
   });
@@ -577,7 +577,7 @@ describe("getFilteredJobs", () => {
   });
 
   it("filters out on-site jobs when onSite filter disabled", () => {
-    ljm._setFilterState({ onSite: false, hybrid: true, remote: true });
+    ljm._setFilterState({ onSite: false, hybrid: true, remote: true, favoritesOnly: false });
     const result = ljm.getFilteredJobs();
     expect(result).toHaveLength(2);
     result.forEach((job) => {
@@ -586,7 +586,7 @@ describe("getFilteredJobs", () => {
   });
 
   it("filters out remote jobs when remote filter disabled", () => {
-    ljm._setFilterState({ onSite: true, hybrid: true, remote: false });
+    ljm._setFilterState({ onSite: true, hybrid: true, remote: false, favoritesOnly: false });
     const result = ljm.getFilteredJobs();
     expect(result).toHaveLength(3);
     result.forEach((job) => {
@@ -595,7 +595,7 @@ describe("getFilteredJobs", () => {
   });
 
   it("filters out hybrid jobs when hybrid filter disabled", () => {
-    ljm._setFilterState({ onSite: true, hybrid: false, remote: true });
+    ljm._setFilterState({ onSite: true, hybrid: false, remote: true, favoritesOnly: false });
     const result = ljm.getFilteredJobs();
     expect(result).toHaveLength(3);
     result.forEach((job) => {
@@ -604,7 +604,7 @@ describe("getFilteredJobs", () => {
   });
 
   it("returns empty array when all filters disabled", () => {
-    ljm._setFilterState({ onSite: false, hybrid: false, remote: false });
+    ljm._setFilterState({ onSite: false, hybrid: false, remote: false, favoritesOnly: false });
     const result = ljm.getFilteredJobs();
     expect(result).toHaveLength(0);
   });
@@ -683,7 +683,7 @@ describe("getFilteredJobs", () => {
   // ── Combined filter + search ──
 
   it("combines filters and search correctly", () => {
-    ljm._setFilterState({ onSite: true, hybrid: false, remote: false });
+    ljm._setFilterState({ onSite: true, hybrid: false, remote: false, favoritesOnly: false });
     ljm._setSearchQuery("frontend");
     const result = ljm.getFilteredJobs();
     expect(result).toHaveLength(1);
@@ -693,7 +693,7 @@ describe("getFilteredJobs", () => {
 
   it("filter disabling takes precedence over search match", () => {
     // Backend Engineer is remote (type 2), disable remote
-    ljm._setFilterState({ onSite: true, hybrid: true, remote: false });
+    ljm._setFilterState({ onSite: true, hybrid: true, remote: false, favoritesOnly: false });
     ljm._setSearchQuery("backend");
     const result = ljm.getFilteredJobs();
     expect(result).toHaveLength(0);

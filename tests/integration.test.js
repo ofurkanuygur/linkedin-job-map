@@ -104,7 +104,7 @@ beforeEach(() => {
   ljm._setCardsBadgeEl(null);
   ljm._setCardsFooterTimeEl(null);
   ljm._setPanelEl(null);
-  ljm._setFilterState({ onSite: true, hybrid: true, remote: true });
+  ljm._setFilterState({ onSite: true, hybrid: true, remote: true, favoritesOnly: false });
   ljm._setSortState("distance");
   ljm._setSearchQuery("");
   ljm._setCurrentLocale("en");
@@ -1269,7 +1269,7 @@ describe("displayFilteredResults", () => {
       j1: makeGeoJob({ jobId: "j1", workplaceType: 1 }),
       j2: makeGeoJob({ jobId: "j2", workplaceType: 2 }),
     });
-    ljm._setFilterState({ onSite: true, hybrid: true, remote: false });
+    ljm._setFilterState({ onSite: true, hybrid: true, remote: false, favoritesOnly: false });
 
     ljm.displayFilteredResults();
 

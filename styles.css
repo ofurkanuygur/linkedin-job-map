@@ -1115,6 +1115,42 @@ body.ljm-fs-active {
   text-align: center;
 }
 
+/* -- Favorites -- */
+.ljm-fav-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: var(--ljm-text-muted);
+  padding: 2px 4px;
+  line-height: 1;
+  transition: color 0.15s ease, transform 0.15s ease;
+  flex-shrink: 0;
+}
+.ljm-fav-btn:hover {
+  color: #f59e0b;
+  transform: scale(1.2);
+}
+.ljm-fav-btn.ljm-fav-active {
+  color: #f59e0b;
+}
+.ljm-popup-fav {
+  cursor: pointer;
+  color: var(--ljm-text-muted);
+  font-size: 14px;
+  transition: color 0.15s ease;
+}
+.ljm-popup-fav:hover,
+.ljm-popup-fav.ljm-fav-active {
+  color: #f59e0b;
+}
+.ljm-dot-fav {
+  background: #f59e0b;
+}
+.ljm-filter-chip-fav .ljm-filter-dot {
+  background: #f59e0b;
+}
+
 /* -- Light Theme -- */
 #ljm-panel[data-ljm-theme="light"] {
   --ljm-bg-primary: #ffffff;

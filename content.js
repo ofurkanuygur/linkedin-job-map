@@ -9,6 +9,9 @@
   var MY_LOC_KEY = "ljm_my_location";
   var ALL_JOBS_KEY = "ljm_all_jobs";
   var COMPANY_NAMES_KEY = "ljm_company_names";
+  var THEME_KEY = "ljm_theme";
+  var FAVORITES_KEY = "ljm_favorites";
+  var SHARED_JOBS_KEY = "ljm_shared_jobs";
   var MAPBOX_TOKEN = "";
 
   var WORKPLACE_ONSITE = 1;
@@ -90,7 +93,13 @@
       posted: "Posted",
       sortDate: "Date",
       tokenRequired: "Mapbox token required. Please set your token in extension settings.",
-      openSettings: "Open Settings"
+      openSettings: "Open Settings",
+      darkMode: "Dark mode",
+      lightMode: "Light mode",
+      favorites: "Favorites",
+      addFavorite: "Add to favorites",
+      removeFavorite: "Remove from favorites",
+      syncedFromTabs: "{count} new jobs synced from other tabs"
     },
     tr: {
       openJobMap: "Haritayi Ac",
@@ -154,7 +163,13 @@
       posted: "Yayinlandi",
       sortDate: "Tarih",
       tokenRequired: "Mapbox token gerekli. Lutfen eklenti ayarlarindan token'inizi ayarlayin.",
-      openSettings: "Ayarlari Ac"
+      openSettings: "Ayarlari Ac",
+      darkMode: "Karanlik mod",
+      lightMode: "Aydinlik mod",
+      favorites: "Favoriler",
+      addFavorite: "Favorilere ekle",
+      removeFavorite: "Favorilerden cikar",
+      syncedFromTabs: "Diger sekmelerden {count} yeni is senkronize edildi"
     }
   };
 
@@ -197,6 +212,9 @@
   var isSyncing = false;
   var pendingFocusJobId = null;
   var mapInitialized = false;
+  var currentTheme = "dark";
+  var tileLayer = null;
+  var favoritesSet = {};
 
   var allJobsById = {};
   var companyNames = {};
@@ -211,7 +229,7 @@
   var debouncedObserverFn = null;
 
   // Filter & Sort state
-  var filterState = { onSite: true, hybrid: true, remote: true };
+  var filterState = { onSite: true, hybrid: true, remote: true, favoritesOnly: false };
   var sortState = "distance"; // "distance" | "company" | "type"
   var searchQuery = "";
 
@@ -240,6 +258,129 @@
   function saveAccumulatedState() {
     saveSession(ALL_JOBS_KEY, allJobsById);
     saveSession(COMPANY_NAMES_KEY, companyNames);
+  }
+
+  function loadFavorites(callback) {
+    if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+      chrome.storage.local.get(FAVORITES_KEY, function (data) {
+        favoritesSet = (data && data[FAVORITES_KEY]) || {};
+        if (callback) callback();
+      });
+    } else {
+      if (callback) callback();
+    }
+  }
+
+  function saveFavorites() {
+    if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+      var obj = {};
+      obj[FAVORITES_KEY] = favoritesSet;
+      chrome.storage.local.set(obj);
+    }
+  }
+
+  function toggleFavorite(jobId) {
+    if (favoritesSet[jobId]) {
+      delete favoritesSet[jobId];
+    } else {
+      favoritesSet[jobId] = true;
+    }
+    saveFavorites();
+
+    var stars = document.querySelectorAll('[data-ljm-fav="' + jobId + '"]');
+    for (var i = 0; i < stars.length; i++) {
+      stars[i].classList.toggle("ljm-fav-active", !!favoritesSet[jobId]);
+      if (stars[i].tagName === "BUTTON" || stars[i].tagName === "SPAN") {
+        stars[i].textContent = favoritesSet[jobId] ? "\u2605" : "\u2606";
+      }
+      stars[i].setAttribute("data-tooltip", favoritesSet[jobId] ? t("removeFavorite") : t("addFavorite"));
+    }
+
+    if (filterState.favoritesOnly) {
+      displayFilteredResults();
+    }
+    updateFilterChipCounts();
+  }
+
+  function isFavorite(jobId) {
+    return !!favoritesSet[jobId];
+  }
+
+  function saveToSharedStorage() {
+    if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+      var obj = {};
+      obj[SHARED_JOBS_KEY] = allJobsById;
+      chrome.storage.local.set(obj);
+    }
+  }
+
+  function loadFromSharedStorage(callback) {
+    if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+      chrome.storage.local.get(SHARED_JOBS_KEY, function (data) {
+        if (data && data[SHARED_JOBS_KEY]) {
+          var shared = data[SHARED_JOBS_KEY];
+          var keys = Object.keys(shared);
+          var newCount = 0;
+          for (var i = 0; i < keys.length; i++) {
+            if (!allJobsById[keys[i]]) {
+              allJobsById[keys[i]] = shared[keys[i]];
+              newCount++;
+            }
+          }
+          if (newCount > 0) {
+            saveAccumulatedState();
+          }
+        }
+        if (callback) callback();
+      });
+    } else {
+      if (callback) callback();
+    }
+  }
+
+  function setupStorageListener() {
+    if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.onChanged) {
+      chrome.storage.onChanged.addListener(function (changes, area) {
+        if (area !== "local") return;
+
+        if (changes[SHARED_JOBS_KEY] && changes[SHARED_JOBS_KEY].newValue) {
+          var shared = changes[SHARED_JOBS_KEY].newValue;
+          var keys = Object.keys(shared);
+          var newCount = 0;
+          for (var i = 0; i < keys.length; i++) {
+            if (!allJobsById[keys[i]]) {
+              allJobsById[keys[i]] = shared[keys[i]];
+              newCount++;
+            }
+          }
+          if (newCount > 0) {
+            saveAccumulatedState();
+            if (map && markersLayer) {
+              displayFilteredResults();
+              setStatus(t("syncedFromTabs", { count: newCount }));
+            } else {
+              setCount(Object.keys(allJobsById).length);
+              updateFilterChipCounts();
+            }
+          }
+        }
+
+        if (changes[FAVORITES_KEY] && changes[FAVORITES_KEY].newValue) {
+          favoritesSet = changes[FAVORITES_KEY].newValue;
+          var stars = document.querySelectorAll("[data-ljm-fav]");
+          for (var s = 0; s < stars.length; s++) {
+            var jid = stars[s].getAttribute("data-ljm-fav");
+            var fav = !!favoritesSet[jid];
+            stars[s].classList.toggle("ljm-fav-active", fav);
+            if (stars[s].tagName === "BUTTON" || stars[s].tagName === "SPAN") {
+              stars[s].textContent = fav ? "\u2605" : "\u2606";
+            }
+          }
+          updateFilterChipCounts();
+          if (filterState.favoritesOnly) displayFilteredResults();
+        }
+      });
+    }
   }
 
   function getAllJobs() {
@@ -701,7 +842,10 @@
       '<div class="ljm-popup-header">' +
         logoHtml +
         '<div>' +
-          '<div class="ljm-popup-title">' + escapeHtml(job.title) + '</div>' +
+          '<div class="ljm-popup-title">' + escapeHtml(job.title) +
+            ' <span class="ljm-popup-fav" data-ljm-fav="' + safeJobId + '" data-tooltip="' +
+            escapeHtml(isFavorite(job.jobId) ? t("removeFavorite") : t("addFavorite")) + '">' +
+            (isFavorite(job.jobId) ? '\u2605' : '\u2606') + '</span></div>' +
           '<div class="ljm-popup-company">' + escapeHtml(job.company) + '</div>' +
         '</div>' +
         '<span class="ljm-popup-wt-badge ' + wtClass + '">' + escapeHtml(getWorkplaceLabel(job.workplaceType)) + '</span>' +
@@ -731,6 +875,13 @@
       if (job.workplaceType === WORKPLACE_REMOTE && !filterState.remote) return false;
       return true;
     });
+
+    // Apply favorites filter
+    if (filterState.favoritesOnly) {
+      filtered = filtered.filter(function (job) {
+        return isFavorite(job.jobId);
+      });
+    }
 
     // Apply search filter
     if (searchQuery) {
@@ -770,7 +921,7 @@
 
   function initMap(container) {
     map = L.map(container, { center: [30, 0], zoom: 2, zoomControl: false });
-    L.tileLayer("https://api.mapbox.com/styles/v1/mapbox/dark-v11/tiles/{z}/{x}/{y}?access_token=" + MAPBOX_TOKEN, {
+    tileLayer = L.tileLayer("https://api.mapbox.com/styles/v1/mapbox/" + (currentTheme === "light" ? "light-v11" : "dark-v11") + "/tiles/{z}/{x}/{y}?access_token=" + MAPBOX_TOKEN, {
       tileSize: 512, zoomOffset: -1, maxZoom: 18, attribution: "&copy; Mapbox"
     }).addTo(map);
 
@@ -1036,6 +1187,19 @@
         countSpan.textContent = "(" + counts[chipMap[keys[i]]] + ")";
       }
     }
+
+    // Update favorites chip count
+    var favChips = document.querySelectorAll('[data-filter-key="favoritesOnly"]');
+    var favCount = all.filter(function (j) { return isFavorite(j.jobId); }).length;
+    for (var f = 0; f < favChips.length; f++) {
+      var favCountSpan = favChips[f].querySelector(".ljm-chip-count");
+      if (!favCountSpan) {
+        favCountSpan = document.createElement("span");
+        favCountSpan.className = "ljm-chip-count";
+        favChips[f].appendChild(favCountSpan);
+      }
+      favCountSpan.textContent = "(" + favCount + ")";
+    }
   }
 
   // ── Central display function (respects filters/sort) ──
@@ -1169,6 +1333,22 @@
       });
       filterGroup.appendChild(btn);
     });
+
+    // Favorites toggle chip
+    var favBtn = document.createElement("button");
+    favBtn.className = "ljm-filter-chip ljm-filter-chip-fav" + (filterState.favoritesOnly ? " ljm-filter-active" : "");
+    favBtn.setAttribute("data-filter-key", "favoritesOnly");
+    var favDot = document.createElement("span");
+    favDot.className = "ljm-filter-dot ljm-dot-fav";
+    favBtn.appendChild(favDot);
+    favBtn.appendChild(document.createTextNode(t("favorites")));
+    favBtn.addEventListener("click", function () {
+      filterState.favoritesOnly = !filterState.favoritesOnly;
+      favBtn.classList.toggle("ljm-filter-active", filterState.favoritesOnly);
+      displayFilteredResults();
+    });
+    filterGroup.appendChild(favBtn);
+
     bar.appendChild(filterGroup);
 
     // Sort select
@@ -1313,6 +1493,18 @@
       compEl.textContent = job.company;
       info.appendChild(compEl);
       hdr.appendChild(info);
+
+      var favStar = document.createElement("button");
+      favStar.className = "ljm-fav-btn" + (isFavorite(job.jobId) ? " ljm-fav-active" : "");
+      favStar.setAttribute("data-ljm-fav", job.jobId);
+      favStar.setAttribute("data-tooltip", isFavorite(job.jobId) ? t("removeFavorite") : t("addFavorite"));
+      favStar.textContent = isFavorite(job.jobId) ? "\u2605" : "\u2606";
+      favStar.addEventListener("click", function (e) {
+        e.stopPropagation();
+        toggleFavorite(job.jobId);
+      });
+      hdr.appendChild(favStar);
+
       card.appendChild(hdr);
 
       // Tags
@@ -1490,6 +1682,9 @@
       companyNames = {};
       companyCache = {};
       saveAccumulatedState();
+      if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+        chrome.storage.local.remove(SHARED_JOBS_KEY);
+      }
       if (map && markersLayer) {
         markersLayer.clearLayers();
         markerRefs = {};
@@ -1502,6 +1697,20 @@
       scanCurrentPage();
     });
     actions.appendChild(clearBtn);
+
+    var themeBtn = document.createElement("button");
+    themeBtn.id = "ljm-theme-btn";
+    themeBtn.className = "ljm-header-btn";
+    updateThemeBtnIcon(themeBtn, currentTheme);
+    themeBtn.addEventListener("click", function () {
+      var newTheme = currentTheme === "dark" ? "light" : "dark";
+      applyTheme(newTheme);
+      if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.sync) {
+        var obj = {}; obj[THEME_KEY] = newTheme;
+        chrome.storage.sync.set(obj);
+      }
+    });
+    actions.appendChild(themeBtn);
 
     var fsBtn = document.createElement("button");
     fsBtn.id = "ljm-fs-btn";
@@ -1579,6 +1788,12 @@
 
     // Clear location from popup
     panelEl.addEventListener("click", function (e) {
+      if (e.target && e.target.classList.contains("ljm-popup-fav")) {
+        e.preventDefault();
+        var fJobId = e.target.getAttribute("data-ljm-fav");
+        if (fJobId) toggleFavorite(fJobId);
+        return;
+      }
       if (e.target && e.target.classList.contains("ljm-clear-loc")) {
         e.preventDefault();
         clearMyLocation();
@@ -1640,6 +1855,55 @@
     }
   }
 
+  function applyTheme(theme) {
+    currentTheme = theme;
+    if (panelEl) panelEl.setAttribute("data-ljm-theme", theme);
+    document.body.setAttribute("data-ljm-theme", theme);
+    if (map && tileLayer) {
+      var style = theme === "light" ? "light-v11" : "dark-v11";
+      tileLayer.setUrl("https://api.mapbox.com/styles/v1/mapbox/" + style + "/tiles/{z}/{x}/{y}?access_token=" + MAPBOX_TOKEN);
+    }
+    var themeBtn = document.getElementById("ljm-theme-btn");
+    if (themeBtn) {
+      updateThemeBtnIcon(themeBtn, theme);
+    }
+  }
+
+  function updateThemeBtnIcon(btn, theme) {
+    while (btn.firstChild) btn.removeChild(btn.firstChild);
+    var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("width", "16");
+    svg.setAttribute("height", "16");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("fill", "none");
+    svg.setAttribute("stroke", "currentColor");
+    svg.setAttribute("stroke-width", "2");
+    svg.setAttribute("stroke-linecap", "round");
+    svg.setAttribute("stroke-linejoin", "round");
+    if (theme === "dark") {
+      var circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      circle.setAttribute("cx", "12");
+      circle.setAttribute("cy", "12");
+      circle.setAttribute("r", "5");
+      svg.appendChild(circle);
+      var rays = [[12,1,12,3],[12,21,12,23],[4.22,4.22,5.64,5.64],[18.36,18.36,19.78,19.78],[1,12,3,12],[21,12,23,12],[4.22,19.78,5.64,18.36],[18.36,5.64,19.78,4.22]];
+      rays.forEach(function (r) {
+        var line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", String(r[0]));
+        line.setAttribute("y1", String(r[1]));
+        line.setAttribute("x2", String(r[2]));
+        line.setAttribute("y2", String(r[3]));
+        svg.appendChild(line);
+      });
+    } else {
+      var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("d", "M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z");
+      svg.appendChild(path);
+    }
+    btn.appendChild(svg);
+    btn.setAttribute("data-tooltip", theme === "dark" ? t("lightMode") : t("darkMode"));
+  }
+
   // ── Main Logic ──
 
   function loadPageJobs(csrf) {
@@ -1677,6 +1941,7 @@
       allJobsById[j.jobId] = j;
     });
     saveAccumulatedState();
+    saveToSharedStorage();
 
     if (map && markersLayer) {
       displayFilteredResults();
@@ -1837,7 +2102,10 @@
     loadAccumulatedState();
 
     if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.sync) {
-      chrome.storage.sync.get("mapboxToken", function (data) {
+      chrome.storage.sync.get(["mapboxToken", THEME_KEY], function (data) {
+        if (data && data[THEME_KEY]) {
+          currentTheme = data[THEME_KEY];
+        }
         if (data && data.mapboxToken) {
           MAPBOX_TOKEN = data.mapboxToken;
           boot();
@@ -1908,14 +2176,20 @@
   }
 
   function boot() {
-    createUI();
-    setupJobCardClickListener();
-    setupKeyboardShortcuts();
-    var existingCount = Object.keys(allJobsById).length;
-    if (existingCount > 0) setCount(existingCount);
-    scanCurrentPage();
-    startUrlWatcher();
-    reattachJobListObserver();
+    loadFavorites(function () {
+      loadFromSharedStorage(function () {
+        createUI();
+        applyTheme(currentTheme);
+        setupJobCardClickListener();
+        setupKeyboardShortcuts();
+        setupStorageListener();
+        var existingCount = Object.keys(allJobsById).length;
+        if (existingCount > 0) setCount(existingCount);
+        scanCurrentPage();
+        startUrlWatcher();
+        reattachJobListObserver();
+      });
+    });
   }
 
   // ── Test exports (only in test environment) ──
@@ -1959,6 +2233,8 @@
       exportJobsCSV: exportJobsCSV,
       setStatus: setStatus,
       setCount: setCount,
+      applyTheme: applyTheme,
+      updateThemeBtnIcon: updateThemeBtnIcon,
       toggleFullscreen: toggleFullscreen,
       getCompanyName: getCompanyName,
       captureCompanyNamesFromDOM: captureCompanyNamesFromDOM,
@@ -1987,6 +2263,15 @@
       init: init,
       boot: boot,
       showTokenRequiredUI: showTokenRequiredUI,
+      loadFavorites: loadFavorites,
+      saveFavorites: saveFavorites,
+      toggleFavorite: toggleFavorite,
+      isFavorite: isFavorite,
+      saveToSharedStorage: saveToSharedStorage,
+      loadFromSharedStorage: loadFromSharedStorage,
+      setupStorageListener: setupStorageListener,
+      _setFavoritesSet: function (f) { favoritesSet = f; },
+      _getFavoritesSet: function () { return favoritesSet; },
       _setMyLocation: function (loc) { myLocation = loc; },
       _setAllJobsById: function (jobs) { allJobsById = jobs; },
       _setFilterState: function (state) { filterState = state; },
@@ -2015,7 +2300,10 @@
       _getIsLoading: function () { return isLoading; },
       _getPendingScanAfterLoad: function () { return pendingScanAfterLoad; },
       _getMarkerRefs: function () { return markerRefs; },
-      _getCurrentGeoJobs: function () { return currentGeoJobs; }
+      _getCurrentGeoJobs: function () { return currentGeoJobs; },
+      _setCurrentTheme: function (th) { currentTheme = th; },
+      _getCurrentTheme: function () { return currentTheme; },
+      _setTileLayer: function (l) { tileLayer = l; }
     };
   } else {
     init();

@@ -133,7 +133,7 @@ beforeEach(() => {
   // Reset all module-level state
   ljm._setMyLocation(null);
   ljm._setAllJobsById({});
-  ljm._setFilterState({ onSite: true, hybrid: true, remote: true });
+  ljm._setFilterState({ onSite: true, hybrid: true, remote: true, favoritesOnly: false });
   ljm._setSortState("distance");
   ljm._setSearchQuery("");
   ljm._setCompanyNames({});
@@ -748,7 +748,7 @@ describe("displayFilteredResults", () => {
     ljm._setAllJobsById(jobs);
 
     // Disable remote filter
-    ljm._setFilterState({ onSite: true, hybrid: true, remote: false });
+    ljm._setFilterState({ onSite: true, hybrid: true, remote: false, favoritesOnly: false });
 
     ljm.displayFilteredResults();
 

@@ -217,7 +217,6 @@
 
   var allJobsById = {};
   var companyNames = {};
-  var pagesScanned = 0;
   var lastUrl = location.href;
   var jobListObserver = null;
   var isLoading = false;
@@ -242,18 +241,17 @@
 
   function loadSession(key) {
     try { return JSON.parse(sessionStorage.getItem(key)); }
-    catch (e) { return null; }
+    catch (_e) { return null; }
   }
 
   function saveSession(key, data) {
     try { sessionStorage.setItem(key, JSON.stringify(data)); }
-    catch (e) {}
+    catch (_e) {}
   }
 
   function loadAccumulatedState() {
     allJobsById = loadSession(ALL_JOBS_KEY) || {};
     companyNames = loadSession(COMPANY_NAMES_KEY) || {};
-    pagesScanned = Object.keys(allJobsById).length > 0 ? 1 : 0;
   }
 
   function saveAccumulatedState() {
@@ -269,7 +267,7 @@
 
   function getGeocodeCache() {
     try { return JSON.parse(localStorage.getItem(GEOCODE_CACHE_KEY) || "{}"); }
-    catch (e) { return {}; }
+    catch (_e) { return {}; }
   }
 
   function setGeocodeCache(cache) {
@@ -454,7 +452,7 @@
         if (logoImg && logoImg.rootUrl && logoImg.artifacts && logoImg.artifacts.length > 0) {
           logoUrl = logoImg.rootUrl + logoImg.artifacts[logoImg.artifacts.length - 1].fileIdentifyingUrlPathSegment;
         }
-      } catch (e) {}
+      } catch (_e) {}
       var result = {
         headquarter: d.headquarter || null,
         confirmedLocations: d.confirmedLocations || [],
@@ -625,7 +623,6 @@
 
   function geocodeJobs(jobs, onProgress) {
     // Separate: jobs with direct coordinates vs jobs needing geocoding
-    var needGeocode = [];
     var addrs = [], addrSet = {};
     jobs.forEach(function (j) {
       if (j.directLat != null && j.directLng != null) return; // has LinkedIn coordinates
@@ -1551,11 +1548,10 @@
     clearBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
     clearBtn.setAttribute("data-tooltip", t("clearAllCache"));
     clearBtn.addEventListener("click", function () {
-      try { localStorage.removeItem(GEOCODE_CACHE_KEY); } catch (e) {}
+      try { localStorage.removeItem(GEOCODE_CACHE_KEY); } catch (_e) {}
       allJobsById = {};
       companyNames = {};
       companyCache = {};
-      pagesScanned = 0;
       saveAccumulatedState();
       if (map && markersLayer) {
         markersLayer.clearLayers();
@@ -1780,7 +1776,6 @@
     loadPageJobs(csrf).then(function (newGeoJobs) {
       isLoading = false;
       if (newGeoJobs.length > 0) {
-        pagesScanned++;
         mergeAndDisplay(newGeoJobs);
       }
       if (pendingScanAfterLoad) { pendingScanAfterLoad = false; scanCurrentPage(); }
@@ -1901,7 +1896,7 @@
         sessionStorage.removeItem(ALL_JOBS_KEY);
         sessionStorage.removeItem(COMPANY_NAMES_KEY);
       }
-    } catch (e) {}
+    } catch (_e) {}
 
     loadAccumulatedState();
 

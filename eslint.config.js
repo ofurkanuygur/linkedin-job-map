@@ -27,7 +27,7 @@ export default [
       }
     },
     rules: {
-      "no-unused-vars": ["warn", { varsIgnorePattern: "^_" }],
+      "no-unused-vars": ["warn", { varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" }],
       "no-undef": "error",
       "no-redeclare": "error",
       "eqeqeq": ["warn", "smart"],

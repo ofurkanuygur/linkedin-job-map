@@ -70,6 +70,6 @@
   clearCacheBtn.addEventListener("click", function () {
     // We can't access LinkedIn's localStorage from here,
     // so we inform the user to clear it from the LinkedIn page.
-    showMsg("Geocode cache is stored on LinkedIn's domain. Open LinkedIn, press F12, go to Console, and run: localStorage.removeItem('ljm_geocode_cache')", "success");
+    showMsg("Geocode cache is stored on LinkedIn's domain. Open LinkedIn, press F12, go to Console, and run: localStorage.removeItem('ljm_geocode_cache_v3')", "success");
   });
 })();

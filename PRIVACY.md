@@ -21,7 +21,6 @@ All data processing happens **locally in your browser**:
 
 - **Job listing data** is read from the LinkedIn page you are viewing and is used solely to display jobs on the map. This data is never transmitted externally.
 - **Geocoding requests** are sent to the Mapbox API to convert job location addresses into map coordinates. Only the job location address string is sent — no personal information.
-- **Routing requests** are sent to the OSRM (Open Source Routing Machine) API when you explicitly request a route. Only geographic coordinates are sent.
 - **Geocoding cache** is stored in your browser's `localStorage` to reduce redundant API calls. This data never leaves your browser.
 - **Map tiles** are loaded from Mapbox to render the map interface.
 
@@ -30,14 +29,13 @@ All data processing happens **locally in your browser**:
 | Service | Purpose | Data Sent |
 |---------|---------|-----------|
 | [Mapbox](https://www.mapbox.com/legal/privacy) | Map tiles and geocoding | Job location addresses, map viewport coordinates |
-| [OSRM](https://project-osrm.org/) | Route calculation | Geographic coordinates (when user requests a route) |
 
 No personal information is shared with these services.
 
 ## Permissions
 
 - **storage**: Save your Mapbox API token preference (configured in the Options page)
-- **Host permissions**: Connect to LinkedIn's API (job data), Mapbox (maps/geocoding), and OSRM (routing)
+- **Host permissions**: Connect to LinkedIn's API (job data) and Mapbox (maps/geocoding)
 
 ## Local Storage
 

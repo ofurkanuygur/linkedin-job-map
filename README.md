@@ -44,7 +44,6 @@ A Chrome Extension that brings LinkedIn job listings to life on an interactive, 
 - **Bidirectional Sync** -- Click a job card and the map flies to it; click a map pin and the card highlights
 - **Fullscreen Mode** -- Expand the map to fill the entire viewport with a slide-out job panel
 - **GPS & Click Location** -- Set your location via GPS or by clicking anywhere on the map
-- **OSRM Routing** -- Real driving/cycling route overlay between your location and any job
 - **Bilingual UI** -- Full English and Turkish interface, auto-detected from browser language
 - **Dark Glassmorphism Theme** -- A polished, modern design that feels native to LinkedIn's dark mode
 - **Cache Management** -- Geocoding results cached locally; clear all caches from the header
@@ -75,9 +74,9 @@ A Chrome Extension that brings LinkedIn job listings to life on an interactive, 
 <sub>Color-coded workplace type chips with counts</sub>
 </td>
 <td align="center">
-<img src="docs/screenshots/route.png" alt="Route & Commute" width="400" /><br/>
-<strong>Route & Commute</strong><br/>
-<sub>OSRM routing with estimated travel time</sub>
+<img src="docs/screenshots/route.png" alt="Commute Estimation" width="400" /><br/>
+<strong>Commute Estimation</strong><br/>
+<sub>Distance-based travel time estimation</sub>
 </td>
 </tr>
 </table>
@@ -149,7 +148,6 @@ The extension requires a Mapbox token for map tiles and geocoding. Setting it up
 | Marker Clustering | [Leaflet.markercluster](https://github.com/Leaflet/Leaflet.markercluster) |
 | Map Tiles | [Mapbox](https://www.mapbox.com/) (Dark theme) |
 | Geocoding | [Mapbox Geocoding API](https://docs.mapbox.com/api/search/geocoding/) |
-| Routing | [OSRM](https://project-osrm.org/) (Open Source Routing Machine) |
 | Job Data | LinkedIn Voyager API (internal, via content script) |
 | UI Design | Custom CSS with glassmorphism effects |
 | Internationalization | Custom `t()` helper with template substitution |
@@ -177,7 +175,7 @@ LinkedIn Job Map is built with privacy as a core principle:
 - **No external servers** -- All processing happens locally in your browser
 - **No account required** -- The extension works immediately after installation
 - **Local caching only** -- Geocoding results are stored in your browser's `localStorage` and never transmitted
-- **Minimal permissions** -- Only requests `storage`; network access is limited to Mapbox (geocoding/tiles) and OSRM (routing)
+- **Minimal permissions** -- Only requests `storage`; network access is limited to Mapbox (geocoding/tiles)
 
 ---
 

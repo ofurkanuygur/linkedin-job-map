@@ -42,7 +42,6 @@ LinkedIn iş ilanlarını interaktif, karanlık temalı bir harita üzerinde gö
 - **Çift Yönlü Senkronizasyon** -- Bir iş kartına tıklayın, harita oraya uçsun; bir harita pinini tıklayın, kart vurgulansın
 - **Tam Ekran Modu** -- Haritayı tüm görünüme genişletin, yandan kayar iş paneli ile
 - **GPS ve Tıkla Konum** -- GPS butonu ile veya haritada herhangi bir yere tıklayarak konumunuzu belirleyin
-- **OSRM Rotalama** -- Konumunuz ile herhangi bir iş arasında gerçek sürücülük/bisiklet rotası
 - **İki Dilli Arayüz** -- Tam İngilizce ve Türkçe arayüz, tarayıcı dilinden otomatik algılanır
 - **Karanlık Glassmorphism Teması** -- LinkedIn'in karanlık moduna uyumlu, modern ve cilalı tasarım
 - **Önbellek Yönetimi** -- Geocoding sonuçları yerel olarak önbelleğe alınır; başlıktan tüm önbelleği temizleyin
@@ -73,9 +72,9 @@ LinkedIn iş ilanlarını interaktif, karanlık temalı bir harita üzerinde gö
 <sub>Sayaçlı renk kodlu çalışma türü çipleri</sub>
 </td>
 <td align="center">
-<img src="docs/screenshots/route.png" alt="Rota ve Yolculuk" width="400" /><br/>
-<strong>Rota ve Yolculuk</strong><br/>
-<sub>Tahmini seyahat süresi ile OSRM rotalama</sub>
+<img src="docs/screenshots/route.png" alt="Yolculuk Tahmini" width="400" /><br/>
+<strong>Yolculuk Tahmini</strong><br/>
+<sub>Mesafeye dayalı seyahat süresi tahmini</sub>
 </td>
 </tr>
 </table>
@@ -148,7 +147,6 @@ Eklenti, harita karoları ve geocoding için bir Mapbox anahtarı gerektirir. Ku
 | İşaretçi Kümeleme | [Leaflet.markercluster](https://github.com/Leaflet/Leaflet.markercluster) |
 | Harita Karoları | [Mapbox](https://www.mapbox.com/) (Karanlık tema) |
 | Geocoding | [Mapbox Geocoding API](https://docs.mapbox.com/api/search/geocoding/) |
-| Rotalama | [OSRM](https://project-osrm.org/) (Açık Kaynaklı Rotalama Motoru) |
 | İş Verileri | LinkedIn Voyager API (dahili, content script aracılığıyla) |
 | Arayüz Tasarımı | Glassmorphism efektli özel CSS |
 | Uluslararasılaştırma | Şablon ikameli özel `t()` yardımcısı |
@@ -199,7 +197,7 @@ LinkedIn Job Map, temel ilke olarak gizlilik ile tasarlanmıştır:
 - **Harici sunucu yok** -- Tüm işlemler tarayıcınızda yerel olarak gerçekleşir
 - **Hesap gerektirmez** -- Eklenti kurulumdan hemen sonra çalışır
 - **Yalnızca yerel önbellekleme** -- Geocoding sonuçları tarayıcınızın `localStorage`'ında saklanır ve asla iletilmez
-- **Minimum izinler** -- Yalnızca `storage` ister; ağ erişimi Mapbox (geocoding/karolar) ve OSRM (rotalama) ile sınırlıdır
+- **Minimum izinler** -- Yalnızca `storage` ister; ağ erişimi Mapbox (geocoding/karolar) ile sınırlıdır
 
 ---
 
